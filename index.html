@@ -910,6 +910,19 @@ input.txt:focus,textarea:focus,.num input:focus,select.sel:focus{border-color:#7
 .sring{display:flex;align-items:center;gap:14px;margin:10px 0 2px;background:rgba(255,255,255,.05);border-radius:16px;padding:10px 12px}
 .sring svg{width:64px;height:64px;transform:rotate(-90deg);flex:none}.sring b{font:600 22px var(--f-body);display:block}.sring small{color:var(--muted);font-size:12.5px}
 
+
+/* Comparativa de supermercados plegable */
+details.pcmp{display:block;padding:0}
+details.pcmp>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px}
+details.pcmp>summary::-webkit-details-marker{display:none}
+details.pcmp .pct{display:flex;flex-direction:column;gap:2px;min-width:0}
+details.pcmp .pct b{font:600 15px var(--f-ui);color:#fff}
+details.pcmp .pct small{font:400 13px var(--f-ui);color:#9a9aa1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+details.pcmp .pct small em{font-style:normal;color:var(--ok);font-weight:600}
+details.pcmp>summary svg{width:20px;height:20px;flex:none;fill:none;stroke:#9a9aa1;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+details.pcmp[open]>summary svg{transform:rotate(180deg)}
+details.pcmp .pcbody{display:grid;gap:8px;padding:0 14px 14px}
+details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(--muted)}
 /* Escritorio: barra lateral fija y columna más ancha, al estilo de las web apps */
 @media (min-width:1024px){
   body:has(.bnav){padding-left:calc(248px + 40px);padding-right:40px}
@@ -3426,15 +3439,18 @@ const PRICE={'Pechuga de pollo':7.5,'Muslo de pollo sin piel':5,'Pechuga de pavo
 function shopCost(L){return L.items.reduce((t,o)=>{const p=PRICE[o.name]??PRICE[o.fd.n]??PRICE_CAT[o.fd.cat]??3;return t+o.g/1000*p},0);}
 function chainsFor(prov){const r=PROVS[prov];if(!r)return [];return [...new Set([...CHAIN_NAT,...(CHAIN_REG[r]||[])])].filter(c=>OCUIDX[c]);}
 const eur=x=>x.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+let PCOPEN=false;
+document.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('pcmp'))PCOPEN=e.target.open},true);
 function priceCmpHTML(L){const sel=`<select class="sel" data-k="provincia" aria-label="Tu provincia"><option value="">Elige tu provincia…</option>${Object.keys(PROVS).sort((a,b)=>a.localeCompare(b,'es')).map(p=>`<option${p===S.provincia?' selected':''}>${esc(p)}</option>`).join('')}</select>`;
-  if(S.pais&&S.pais!=='España')return `<div class="pcmp"><div class="pcmph"><b>¿Dónde sale más barata?</b></div><p class="volnote" style="margin:0">De momento la comparativa de supermercados solo está disponible en España.</p></div>`;
-  if(!S.provincia||!PROVS[S.provincia])return `<div class="pcmp"><div class="pcmph"><b>¿Dónde sale más barata tu compra?</b></div><p class="volnote" style="margin:0 0 8px">Elige tu provincia y comparamos el precio medio de esta lista en los supermercados de tu zona.</p>${sel}</div>`;
+  const box=(teaser,body)=>`<details class="pcmp"${PCOPEN?' open':''}><summary><span class="pct"><b>¿Dónde sale más barata?</b><small>${teaser}</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="pcbody">${body}</div></details>`;
+  if(S.pais&&S.pais!=='España')return box('Solo disponible en España',`<p class="volnote" style="margin:0">De momento la comparativa de supermercados solo está disponible en España.</p>`);
+  if(!S.provincia||!PROVS[S.provincia])return box('Elige tu provincia para comparar',`<p class="volnote" style="margin:0 0 8px">Comparamos el precio medio de esta lista en los supermercados de tu zona.</p>${sel}`);
   const base=shopCost(L),ch=chainsFor(S.provincia).map(c=>({c,i:OCUIDX[c],v:base*OCUIDX[c]/105})).sort((a,b)=>a.v-b.v),mx=ch[ch.length-1].v,mn=ch[0].v,wk=(L.days.length/7)||1;
   const yr=(mx-mn)/wk*52;
-  return `<div class="pcmp"><div class="pcmph"><b>¿Dónde sale más barata tu compra?</b><span>${esc(PROVS[S.provincia])}</span></div>${sel}
+  return box(`<em>${esc(ch[0].c)}</em> · ${eur(mn)} · ahorras ${eur(mx-mn)}`,`<div class="pcprov"><span>${esc(PROVS[S.provincia])}</span>${sel}</div>
     <div class="pcl">${ch.map((x,k)=>`<div class="pcr${k===0?' best':''}"><span class="pcn">${esc(x.c)}${k===0?' <em>más barata</em>':''}</span><span class="pcb"><i style="width:${Math.round(15+85*(x.v-mn)/Math.max(.01,mx-mn))}%"></i></span><b>${eur(x.v)}</b></div>`).join('')}</div>
     <p class="pcs">Comprando en <b>${esc(ch[0].c)}</b> en lugar de <b>${esc(ch[ch.length-1].c)}</b> ahorrarías unos <b>${eur(mx-mn)}</b> en esta lista${L.days.length<7?'':` (≈ ${Math.round(yr)} € al año)`}.</p>
-    <p class="volnote" style="margin:4px 0 0">Estimación: precios de referencia por kilo (marca blanca, 2026) ajustados con el índice de cada cadena del estudio de supermercados de la OCU 2026. Cada tienda concreta puede variar.</p></div>`;}
+    <p class="volnote" style="margin:4px 0 0">Estimación: precios de referencia por kilo (marca blanca, 2026) ajustados con el índice de cada cadena del estudio de supermercados de la OCU 2026. Cada tienda concreta puede variar.</p>`);}
 const BUYAS={'Arroz blanco cocido':['Arroz blanco',.36],'Arroz integral cocido':['Arroz integral',.38],'Pasta cocida':['Pasta',.4],'Pasta integral cocida':['Pasta integral',.42],'Quinoa cocida':['Quinoa',.38],'Cuscús cocido':['Cuscús',.4],
  'Pechuga de pollo a la plancha':['Pechuga de pollo',1.35],'Ternera a la plancha':['Ternera magra',1.35],'Merluza a la plancha':['Merluza',1.25],'Salmón a la plancha':['Salmón',1.25],'Patata cocida':['Patata',1],'Patata (cruda)':['Patata',1],
  'Tortilla francesa':['Huevos',1],'Huevo entero':['Huevos',1]};
