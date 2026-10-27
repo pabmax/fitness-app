@@ -1035,12 +1035,9 @@ const STEPS=[
  {k:'respNote',t:'note',show:d=>d.tabaco==='Sí'||d.tabaco==='Lo estoy dejando',l:'Recomendado: podemos añadir a tu plan trabajo para mejorar tu capacidad aeróbica, fortalecer los músculos con los que respiras y ayudarte con las ganas de fumar. Es opcional y puedes cambiarlo cuando quieras.'},
  {k:'respOpt',t:'multi',l:'¿Qué quieres añadir?',req:1,list:1,ex:'Ahora no',show:d=>d.tabaco==='Sí'||d.tabaco==='Lo estoy dejando',o:['Cardio en zona 2','Músculos inspiratorios','Pausa anti-antojo','Ahora no']},
  {k:'alcohol',t:'chips',l:'Consumo de alcohol',req:1,o:O('Nunca|Ocasional (alguna vez al mes)|Semanal|Varias veces por semana')}]},
-{id:'salud',sec:'1 · Salud',title:'Revisión de salud',intro:'Basada en el cuestionario PAR-Q+. Si marcas algo, te recomendaremos consultar a un médico antes de empezar.',fields:[
- {k:'parq',t:'multi',l:'Marca lo que te aplique',req:1,ex:'Nada de esto',list:1,o:O('Dolor en el pecho al hacer esfuerzo|Mareos o pérdida de conocimiento|Problema cardíaco diagnosticado|Tensión arterial alta|Diabetes|Asma o problema respiratorio|Osteoporosis|Otra enfermedad crónica|Nada de esto')},
- {k:'parqOtra',t:'text',l:'¿Cuál?',show:d=>(d.parq||[]).includes('Otra enfermedad crónica')},
- {k:'patologias',t:'multi',l:'¿Tienes alguna de estas condiciones médicas?',h:'Las tenemos en cuenta desde el principio: cambian qué alimentos entran en tu menú y algunos avisos del entrenamiento. No sustituyen las pautas de tu médico.',req:1,ex:'Ninguna',list:1,o:()=>O('Ninguna|'+Object.keys(COND).join('|')+'|Otra')},
- {k:'patNote',t:'note',show:d=>(d.parq||[]).includes('Diabetes')&&!(d.patologias||[]).some(x=>x.startsWith('Diabetes')),l:()=>'Has marcado diabetes en la revisión: indica aquí de qué tipo para ajustar tu plan.'},
- {k:'patologiaOtra',t:'text',l:'¿Cuál?',show:d=>(d.patologias||[]).includes('Otra')},
+{id:'salud',sec:'1 · Salud',title:'Revisión de salud',intro:'Basada en el cuestionario PAR-Q+. Según lo que marques, te recomendaremos ver a un médico antes de empezar.',fields:[
+ {k:'salud',t:'multi',l:'¿Tienes alguna de estas condiciones?',h:'Ajustan tu menú y los avisos del entreno. Marca todas las que tengas.',req:1,ex:'Nada de esto',o:()=>O(SALUD.map(x=>x[0]).join('|'))},
+ {k:'patologiaOtra',t:'text',l:'¿Cuál?',show:d=>(d.salud||[]).includes('Otra')},
  {k:'medicacion',t:'chips',l:'¿Tomas medicación de forma habitual?',req:1,o:O('No|Sí')},
  {k:'medicacionCual',t:'text',l:'¿Cuál?',show:d=>d.medicacion==='Sí',h:'Algunos fármacos, como betabloqueantes o insulina, cambian cómo responde tu cuerpo al esfuerzo.'},
  {k:'embarazo',t:'chips',l:'¿Embarazo o posparto (menos de 12 meses)?',show:d=>d.sexo==='Mujer'&&d.edad>=14,req:1,o:O('No|Embarazo|Posparto')},
@@ -1110,7 +1107,7 @@ const STEPS=[
 ];
 const FIELD={};STEPS.forEach(s=>s.fields.forEach(f=>FIELD[f.k]=f));
 
-const DEMO={modulo:'Entrenamiento + nutrición',edad:34,sexo:'Hombre',pais:'España',provincia:'Barcelona',unidades:'Métrico (kg, cm)',nivel:'Intermedio',actividad:['Fuerza / pesas','Correr / cardio'],dias:'4',minutos:60,cardio:'Según mi objetivo',lugares:['Gimnasio','Parque de barras'],lugarPrincipal:'Gimnasio',otroDeporte:true,deportes:[{dep:'Pádel / tenis',dias:[5],n:1,int:'Moderada'},{dep:'Running',dias:[],n:1,int:'Suave'}],gymModo:'Con fotos de mi gimnasio',gymMarca:'Technogym',fotosMaq:7,fotosLibre:3,fotosAgarre:2,eqMaq:['Prensa de piernas','Extensión de cuádriceps','Curl femoral sentado','Gemelo en máquina','Jalón al pecho','Remo en polea baja','Poleas (cruce o ajustable)','Press de pecho en máquina','Contractora (pec deck)'],eqLibre:['Rack o jaula','Barra olímpica y discos','Banco plano','Banco inclinable','Mancuernas','Barra Z','Barra de dominadas'],eqAgarre:['Triángulo','Cuerda','Maneral a una mano','Barra larga de jalón'],fotosParque:2,eqParque:['Barra alta','Barra baja','Paralelas','Espalderas'],trabajo:'Sentado la mayor parte del día',pasos:'5.000–8.000',sueno:'6–7',suenoCal:3,estres:4,tabaco:'No',alcohol:'Ocasional (alguna vez al mes)',parq:['Nada de esto'],patologias:['Ninguna'],medicacion:'No',lesion:'Sí',zona:'Rodilla',lado:'Derecho',diagnostico:'Tendinopatía rotuliana (fisio)',fechaLesion:'2026-09-10',cirugia:'No',fase:'Recuperando función',dolorReposo:1,dolorMov:3,dolor24:2,movimientos:['Correr o saltar','Zancadas'],fisio:'Sí',fisioSi:'Isométricos de cuádriceps, sentadilla a cajón',fisioNo:'Saltos y carrera hasta la próxima revisión',alarma:['Ninguna'],altura:178,peso:81,contornos:true,cuello:39,pecho:102,cintura:88,cadera:99,brazo:35,muslo:58,gemelo:38,control:'A ojo',base:{'Desayuno':[{n:'Café con leche',g:200},{n:'Galletas tipo María',g:40}],'Comida':[{n:'Pasta cocida',g:250},{n:'Tomate frito',g:50},{n:'Pechuga de pollo a la plancha',g:130},{n:'Pan blanco',g:60},{n:'Aceite de oliva virgen extra',g:10}],'Cena':[{n:'Tortilla francesa',g:120},{n:'Ensalada mixta',g:150},{n:'Aceite de oliva virgen extra',g:10},{n:'Pan blanco',g:60}],'Picoteo y bebidas':[{n:'Cerveza',g:330},{n:'Patatas fritas de bolsa',g:30},{n:'Chocolate con leche',g:20}]},comidasHoy:'3',comidasPosibles:'4',restaurante:'1–2',horaEntreno:'Tarde',preGap:'1–2 h',agua:'1–2 L',alergias:['Ninguna'],dieta:'Omnívora',cocina:'15–30 min',nivelCocina:'Me defiendo',presupuesto:'Medio',suplementos:['Proteína en polvo','Creatina'],rc1:'Nunca',rc2:'No',objetivo:'Recomposición',secundario:'Ganar fuerza',rendimiento:true,deporte:'Running',fechaPrueba:'2027-03-14',marcas:'10 km en 52 min',plazo:'6 meses',rgpd:true,avisos:true};
+const DEMO={modulo:'Entrenamiento + nutrición',edad:34,sexo:'Hombre',pais:'España',provincia:'Barcelona',unidades:'Métrico (kg, cm)',nivel:'Intermedio',actividad:['Fuerza / pesas','Correr / cardio'],dias:'4',minutos:60,cardio:'Según mi objetivo',lugares:['Gimnasio','Parque de barras'],lugarPrincipal:'Gimnasio',otroDeporte:true,deportes:[{dep:'Pádel / tenis',dias:[5],n:1,int:'Moderada'},{dep:'Running',dias:[],n:1,int:'Suave'}],gymModo:'Con fotos de mi gimnasio',gymMarca:'Technogym',fotosMaq:7,fotosLibre:3,fotosAgarre:2,eqMaq:['Prensa de piernas','Extensión de cuádriceps','Curl femoral sentado','Gemelo en máquina','Jalón al pecho','Remo en polea baja','Poleas (cruce o ajustable)','Press de pecho en máquina','Contractora (pec deck)'],eqLibre:['Rack o jaula','Barra olímpica y discos','Banco plano','Banco inclinable','Mancuernas','Barra Z','Barra de dominadas'],eqAgarre:['Triángulo','Cuerda','Maneral a una mano','Barra larga de jalón'],fotosParque:2,eqParque:['Barra alta','Barra baja','Paralelas','Espalderas'],trabajo:'Sentado la mayor parte del día',pasos:'5.000–8.000',sueno:'6–7',suenoCal:3,estres:4,tabaco:'No',alcohol:'Ocasional (alguna vez al mes)',salud:['Nada de esto'],parq:['Nada de esto'],patologias:['Ninguna'],medicacion:'No',lesion:'Sí',zona:'Rodilla',lado:'Derecho',diagnostico:'Tendinopatía rotuliana (fisio)',fechaLesion:'2026-09-10',cirugia:'No',fase:'Recuperando función',dolorReposo:1,dolorMov:3,dolor24:2,movimientos:['Correr o saltar','Zancadas'],fisio:'Sí',fisioSi:'Isométricos de cuádriceps, sentadilla a cajón',fisioNo:'Saltos y carrera hasta la próxima revisión',alarma:['Ninguna'],altura:178,peso:81,contornos:true,cuello:39,pecho:102,cintura:88,cadera:99,brazo:35,muslo:58,gemelo:38,control:'A ojo',base:{'Desayuno':[{n:'Café con leche',g:200},{n:'Galletas tipo María',g:40}],'Comida':[{n:'Pasta cocida',g:250},{n:'Tomate frito',g:50},{n:'Pechuga de pollo a la plancha',g:130},{n:'Pan blanco',g:60},{n:'Aceite de oliva virgen extra',g:10}],'Cena':[{n:'Tortilla francesa',g:120},{n:'Ensalada mixta',g:150},{n:'Aceite de oliva virgen extra',g:10},{n:'Pan blanco',g:60}],'Picoteo y bebidas':[{n:'Cerveza',g:330},{n:'Patatas fritas de bolsa',g:30},{n:'Chocolate con leche',g:20}]},comidasHoy:'3',comidasPosibles:'4',restaurante:'1–2',horaEntreno:'Tarde',preGap:'1–2 h',agua:'1–2 L',alergias:['Ninguna'],dieta:'Omnívora',cocina:'15–30 min',nivelCocina:'Me defiendo',presupuesto:'Medio',suplementos:['Proteína en polvo','Creatina'],rc1:'Nunca',rc2:'No',objetivo:'Recomposición',secundario:'Ganar fuerza',rendimiento:true,deporte:'Running',fechaPrueba:'2027-03-14',marcas:'10 km en 52 min',plazo:'6 meses',rgpd:true,avisos:true};
 
 const DEF={unidades:'Métrico (kg, cm)',minutos:60};
 const hm=n=>{n=Math.round(+n||0);return n<60?n+' min':Math.floor(n/60)+' h'+(n%60?' '+n%60+' min':'')};
@@ -1263,7 +1260,7 @@ function barbell(steps,idx){
   return `<div class="bar" aria-hidden="true"><div class="shaft"></div><div class="collar"></div><div class="sleeve">${p}<div class="sleeve-end"></div></div></div>`;
 }
 
-function render(keep){renderMain(keep);drawThumbs();if(INFO)app.innerHTML+=infoHTML();if(RSHEET)app.innerHTML+=recipeSheetHTML();if(SKS)app.innerHTML+=sickSheetHTML();if(PICK)app.innerHTML+=pickHTML();if(SRCH){app.innerHTML+=srchHTML();const qi=document.getElementById('srchq');if(qi&&SRCH.focus){qi.focus();SRCH.focus=false}}if(SHEET){app.innerHTML+=sheetHTML();if(typeof document.getElementById==='function'&&FIG.has(SHEET))FIG.animate(document.getElementById('figanim'),SHEET)}}
+function render(keep){saludMigrate();renderMain(keep);drawThumbs();if(INFO)app.innerHTML+=infoHTML();if(RSHEET)app.innerHTML+=recipeSheetHTML();if(SKS)app.innerHTML+=sickSheetHTML();if(PICK)app.innerHTML+=pickHTML();if(SRCH){app.innerHTML+=srchHTML();const qi=document.getElementById('srchq');if(qi&&SRCH.focus){qi.focus();SRCH.focus=false}}if(SHEET){app.innerHTML+=sheetHTML();if(typeof document.getElementById==='function'&&FIG.has(SHEET))FIG.animate(document.getElementById('figanim'),SHEET)}}
 function renderMain(keep){
   if(curId==='progreso'){
     app.innerHTML=rvTop()+`<div class="meta" style="margin-top:14px"><button class="link" data-tab="miplan">← Mi plan</button><span class="count">Ciclo actual</span></div><h1>Tu progreso</h1>${progHTML()}${bnavHTML('seg')}`;
@@ -1297,7 +1294,7 @@ function pick(k,v){
     S[k]=a;}
   else{const val=f.t==='scale'?Number(v):v;S[k]=(S[k]===val&&!f.req)?undefined:val;}
   if(k==='gymMarca'){const b=BRANDS[S.gymMarca];if(b){const set=new Set();Object.values(b).forEach(x=>Object.keys(x.m).forEach(l=>set.add(l)));S.gymModo='Con fotos de mi gimnasio';S.eqMaq=MAQ.filter(l=>set.has(l));S.eqLibre=[...LIBRE];S.eqAgarre=[...AGARRE];}else if(S.gymMarca)S.gymModo='Plan genérico';}
-  if(k==='parq'&&(S.parq||[]).includes('Tensión arterial alta')&&!(S.patologias||[]).includes('Hipertensión'))S.patologias=[...(S.patologias||[]).filter(x=>x!=='Ninguna'),'Hipertensión'];
+  if(k==='salud')saludSync();
   errs.delete(k);save();render(true);
 }
 function validate(st){
@@ -1309,7 +1306,6 @@ function validate(st){
     else if(f.t==='number'&&v!=null&&!empty(v)&&(v<=0||v>500))errs.add(f.k);
     else if(f.email&&v&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))errs.add(f.k);
   });
-  if(st.id==='salud'&&(S.parq||[]).includes('Diabetes')&&!(S.patologias||[]).some(x=>x.startsWith('Diabetes')))errs.add('patologias');
   return !errs.size;
 }
 function act(a,el){
@@ -1785,6 +1781,22 @@ const COND={
  'Anemia por falta de hierro':{pref:['Ternera magra (cruda)','Ternera a la plancha','Lentejas cocidas','Mejillones cocidos','Espinacas','Garbanzos cocidos','Naranja','Kiwi','Pimiento rojo'],
    changes:['Se priorizan carne roja magra, legumbres y mejillones','Fruta rica en vitamina C en la misma comida para absorber mejor el hierro'],alerts:['Toma el café y el té lejos de las comidas principales. El suplemento de hierro, solo si te lo pauta tu médico.']},
  'Hipotiroidismo':{changes:['No requiere cambios en los alimentos'],alerts:['Toma la levotiroxina en ayunas, 30–60 min antes del desayuno, y separada del café, la soja y los suplementos de calcio o hierro.']}};
+/* Una sola pregunta de salud: cada opción marca si pide revisión médica (PAR-Q+) y qué condición ajusta el menú */
+const SALUD=[['Corazón',1,null],['Mareos o desmayos',1,null],['Tensión alta',1,'Hipertensión'],
+ ['Diabetes tipo 1',1,'Diabetes tipo 1'],['Diabetes tipo 2',1,'Diabetes tipo 2 o prediabetes'],['Colesterol alto',0,'Colesterol o triglicéridos altos'],
+ ['Asma',1,null],['Riñón',1,'Enfermedad renal crónica'],['Celiaquía',0,'Celiaquía'],['Ácido úrico o gota',0,'Gota o ácido úrico alto'],['Hígado graso',0,'Hígado graso'],
+ ['Reflujo',0,'Reflujo gastroesofágico'],['Colon irritable',0,'Síndrome de intestino irritable'],['Anemia',0,'Anemia por falta de hierro'],['Hipotiroidismo',0,'Hipotiroidismo'],
+ ['Osteoporosis',1,null],['Otra',1,'Otra'],['Nada de esto',0,null]];
+function saludSync(){const a=(S.salud||[]).map(l=>SALUD.find(x=>x[0]===l)).filter(Boolean);
+  const pq=a.filter(x=>x[1]).map(x=>x[0]),pt=a.filter(x=>x[2]).map(x=>x[2]);
+  S.parq=a.length?(pq.length?pq:['Nada de esto']):undefined;S.patologias=a.length?(pt.length?pt:['Ninguna']):undefined;}
+function saludMigrate(){if(S.salud!==undefined||!(S.parq||S.patologias))return;
+  const OLD={'Dolor en el pecho al hacer esfuerzo':'Corazón','Problema cardíaco diagnosticado':'Corazón','Mareos o pérdida de conocimiento':'Mareos o desmayos','Tensión arterial alta':'Tensión alta','Asma o problema respiratorio':'Asma','Osteoporosis':'Osteoporosis','Otra enfermedad crónica':'Otra'};
+  const out=new Set();(S.parq||[]).forEach(x=>OLD[x]&&out.add(OLD[x]));
+  (S.patologias||[]).forEach(c=>{const r=SALUD.find(x=>x[2]===c);if(r)out.add(r[0])});
+  if((S.parq||[]).includes('Diabetes')&&![...out].some(x=>x.startsWith('Diabetes')))out.add('Diabetes tipo 2');
+  if(S.parqOtra&&!S.patologiaOtra)S.patologiaOtra=S.parqOtra;
+  S.salud=out.size?[...out]:((S.parq||S.patologias)?['Nada de esto']:undefined);saludSync();}
 const conds=()=>(S.patologias||[]).filter(x=>COND[x]);
 function condRule(fd){const cs=conds();if(!cs.length||!fd)return null;let r=null;
   for(const c of cs){const x=COND[c];if((x.ex||[]).includes(fd.n)||(x.exTag||[]).some(t=>fd.t.includes(t)))return 'ex';if((x.lim||[]).includes(fd.n))r='lim';else if(!r&&(x.pref||[]).includes(fd.n))r='pref'}return r;}
@@ -3702,7 +3714,7 @@ render();
 </script>
 
 <script>
-addEventListener('load',()=>setTimeout(()=>{const s=document.getElementById('splash');if(s){s.classList.add('off');setTimeout(()=>s.remove(),400)}},250));
+setTimeout(()=>{const s=document.getElementById('splash');if(s){s.classList.add('off');setTimeout(()=>s.remove(),400)}},350);
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
