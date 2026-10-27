@@ -1127,6 +1127,14 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 .stcon{background:#1A1A1E;border-radius:16px}.stcon summary{padding:13px 14px;font:600 14.5px var(--f-ui)}
 .stcon ol{margin:0;padding:0 16px 4px 34px;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;font-size:14px;color:#d6d6de}.stcon p{padding:0 14px 12px;margin:6px 0 0}
 .stcopy{display:flex;gap:8px;align-items:center;margin-top:6px;background:#0B0B0D;border-radius:10px;padding:6px 6px 6px 10px}.stcopy code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;font:500 12.5px var(--f-mono);color:#B3A9FF}
+.pedit{flex-direction:column;gap:8px}
+.prow{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:8px;align-items:center}
+.pav{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#fff;font:700 14px var(--f-ui)}
+.pdelb{all:unset;cursor:pointer;padding:9px 12px;border-radius:12px;background:rgba(255,90,95,.12);color:#ff8a8d;font:600 13.5px var(--f-ui)}
+.pdelb:focus-visible{outline:2px solid #ff8a8d;outline-offset:2px}
+.pdel{background:rgba(255,90,95,.1);border:1px solid rgba(255,90,95,.35);border-radius:14px;padding:12px}
+.pdel p{margin:0 0 10px;font-size:14px;color:#f0d6d7;text-align:left}.pdel div{display:flex;gap:8px;justify-content:flex-end}
+.btn.danger{background:#E5484D;border-color:#E5484D;color:#fff}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -1765,9 +1773,23 @@ function switchProfile(id){save();regSave();PROF.cur=id;profSave();S={...DEF};cu
   PICK=false;window.scrollTo(0,0);render();dbLoad().then(()=>render(true)).catch(()=>{});toast('Entrenando como '+curProf().name);}
 function pickHTML(){return `<div class="pick" role="dialog" aria-modal="true" aria-label="Elegir perfil"><span class="wm" style="align-self:flex-start">TU PLAN</span><h2>¿Quién entrena hoy?</h2>
   <div class="pgrid">${PROF.list.map(x=>`<button type="button" data-prof="${x.id}"><span style="background:${profCol(x.id)}">${esc((x.name||'?')[0].toUpperCase())}</span>${esc(x.name)}</button>`).join('')}${PROF.list.length<5?'<button type="button" class="add" data-act="profnew"><span>+</span>Añadir perfil</button>':''}</div>
-  ${PICK==='edit'?`<div class="pnew" style="flex-direction:column">${PROF.list.map(x=>`<input class="sel" data-pren="${x.id}" value="${esc(x.name)}" maxlength="16" aria-label="Nombre del perfil">`).join('')}<button class="btn primary" data-act="profsave">Guardar nombres</button></div>`:''}
+  ${PICK==='edit'?`<div class="pnew pedit">${PROF.list.map(x=>PDEL===x.id?`<div class="pdel"><p>¿Borrar el perfil <b>${esc(x.name)}</b>? Se eliminan su cuestionario, su plan y todo su registro. No se puede deshacer.</p><div><button type="button" class="btn" data-pdelno>Cancelar</button><button type="button" class="btn danger" data-pdelok="${x.id}">Borrar perfil</button></div></div>`
+      :`<div class="prow"><span class="pav" style="background:${profCol(x.id)}">${esc((x.name||'?')[0].toUpperCase())}</span><input class="sel" data-pren="${x.id}" value="${esc(x.name)}" maxlength="16" aria-label="Nombre de ${esc(x.name)}"><button type="button" class="pdelb" data-pdel="${x.id}" aria-label="Borrar el perfil ${esc(x.name)}">Borrar</button></div>`).join('')}<button class="btn primary" data-act="profsave">Guardar nombres</button></div>`:''}
   ${PICK==='new'?`<div class="pnew"><input id="pname" class="sel" placeholder="Nombre" maxlength="16" aria-label="Nombre del perfil"><button class="btn primary" style="flex:none" data-act="profadd">Crear</button></div>`:''}
-  <p class="volnote" style="max-width:320px;text-align:center;margin-top:22px">Cada perfil tiene su propio cuestionario, plan, menú y registro.<br><button class="link small" data-act="profedit">Editar nombres</button>${PROF.list.length>1||curId==='resumen'?' · <button class="link small" data-act="pickclose">Cerrar</button>':''}</p></div>`;}
+  <p class="volnote" style="max-width:320px;text-align:center;margin-top:22px">Cada perfil tiene su propio cuestionario, plan, menú y registro.<br><button class="link small" data-act="profedit">Gestionar perfiles</button>${PROF.list.length>1||curId==='resumen'?' · <button class="link small" data-act="pickclose">Cerrar</button>':''}</p></div>`;}
+let PDEL=null;
+const keysFor=id=>id==='p1'?['onb-fitness','onb-fitness-reg']:['onb-fitness:'+id,'onb-fitness-reg:'+id];
+function deleteProfile(id){const x=PROF.list.find(y=>y.id===id);if(!x)return;const name=x.name,wasCur=PROF.cur===id;
+  keysFor(id).forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+  try{if(DBBASE)DBBASE.db.doc('data/users/'+DBBASE.id+'/registro'+(id==='p1'?'':'-'+id)).delete().catch(()=>{})}catch(e){}
+  PROF.list=PROF.list.filter(y=>y.id!==id);PDEL=null;
+  if(!PROF.list.length){PROF.list=[{id:'p1',name:'Tú'}];PROF.cur='p1';profSave();S={...DEF};curId='modulo';curQ=0;REG={log:{},ai:{}};PICK=false;render();toast('Perfil «'+name+'» borrado');return}
+  if(wasCur){PROF.cur=PROF.list[0].id;profSave();S={...DEF};curId='modulo';curQ=0;REG={log:{},ai:{}};
+    try{const r=JSON.parse(localStorage.getItem(sKey())||'null');if(r&&r.S){S=r.S;curId=r.cur||'modulo';curQ=r.q||0}}catch(e){}
+    try{const r=JSON.parse(localStorage.getItem(rKey())||'null');if(r&&r.log)REG=migrate(r)}catch(e){}
+    if(typeof dbLoad==='function')dbLoad().then(()=>render(true)).catch(()=>{});}
+  else profSave();
+  PICK='edit';render(true);toast('Perfil «'+name+'» borrado')}
 function fallbackCopy(t){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(e){}a.remove()}
 function selPre(){const p=document.getElementById('json');if(!p)return;const r=document.createRange();r.selectNodeContents(p);const s=getSelection();s.removeAllRanges();s.addRange(r)}
 
@@ -1786,6 +1808,9 @@ app.addEventListener('click',e=>{
   const tsc=e.target.closest('[data-tscope]');if(tsc){const k=S.timeEdit;S.timeScope=tsc.dataset.tscope;if(k){const [w,d]=k.split('|'),dt={...(S.dayTime||{})},cur=dt[k]||dt['*|'+d];if(cur){if(S.timeScope==='todas'){dt['*|'+d]=cur;delete dt[k]}else{dt[k]=cur}S.dayTime=dt}}save();render(true);if(k&&(S.dayTime||{})[S.timeScope==='todas'?'*|'+k.split('|')[1]:k])toast(S.timeScope==='todas'?'Aplicado a todos los '+DSEM[+k.split('|')[1]].toLowerCase().replace(/([^s])$/,'$1s'):'Aplicado solo a este día');return}
   const ts=e.target.closest('[data-tset]');if(ts){const [w,d,f,v]=ts.dataset.tset.split('|');S.trW=S.nutW=+w;S.trD=S.nutD=+d;const key=(S.timeScope==='todas'?'*':w)+'|'+d,cur=dayTiming(+w,+d),dt={...(S.dayTime||{})};const o={h:cur.h,gap:cur.gap,...(dt[key]||{}),[f]:v};if(o.gap==='Entreno en ayunas'&&o.h!=='Mañana')o.gap=GAPS.includes(S.preGap)?S.preGap:'2–3 h';dt[key]=o;S.dayTime=dt;save();render(true);toast(timeMsg(+w,+d));return}
   const tr=e.target.closest('[data-treset]');if(tr){const [w,d]=tr.dataset.treset.split('|'),dt={...(S.dayTime||{})};delete dt[w+'|'+d];delete dt['*|'+d];S.dayTime=dt;save();render(true);toast('Hora por defecto restablecida');return}
+  const pdl=e.target.closest('[data-pdel]');if(pdl){PDEL=pdl.dataset.pdel;render(true);return}
+  if(e.target.closest('[data-pdelno]')){PDEL=null;render(true);return}
+  const pdo=e.target.closest('[data-pdelok]');if(pdo){deleteProfile(pdo.dataset.pdelok);return}
   const pf=e.target.closest('[data-prof]');if(pf){switchProfile(pf.dataset.prof);return}
   const so=e.target.closest('[data-sickopen]');if(so){const [w,d]=so.dataset.sickopen.split('|').map(Number),r=sickAt(w,d),days=new Set([d]);if(r)Object.entries(REG.sick||{}).forEach(([k,v])=>{const m=k.match(/^c(\d+)\|(\d)\|(\d)$/);if(m&&+m[1]===curC()&&+m[2]===w&&v.ep===r.ep)days.add(+m[3])});
     SKS={w,d,type:r?r.type:'Resfriado',lvl:r?r.lvl:'Leve',days,ep:r?r.ep:null};render(true);return}
