@@ -31,7 +31,7 @@
 <p align="center">
   <img src="docs/escritorio.png" width="90%" alt="Versión de escritorio con barra lateral">
 </p>
-<p align="center"><sub>En el ordenador se muestra con barra lateral; en el móvil, con barra inferior.</sub></p>
+<p align="center"><sub>En el ordenador (pantallas 16:9) se muestra como web, con barra lateral y contenido en columnas; en el móvil, con barra inferior.</sub></p>
 
 ---
 
