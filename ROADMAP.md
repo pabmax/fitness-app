@@ -43,16 +43,26 @@ Envolver la app actual con **Capacitor**, que reutiliza casi todo el código.
 ---
 
 ## 3. Inteligencia artificial ⏸️
-Pausada con `AI_PAUSED = true` en `index.html`.
+Pausada con `AI_PAUSED = true` en `index.html`. El código de estas funciones ya existe; al reactivarla vuelven todas:
 
-- Generar o ajustar el plan con IA, el análisis de fotos del gimnasio y la predicción de cargas necesitan un servidor propio con una clave de API, porque una web pública no puede guardar la clave de forma segura.
-- Tiene coste de uso por cada llamada.
+- **Generar el plan con IA** a partir del cuestionario, con el plan del motor de reglas como respaldo.
+- **Detectar máquinas y material en fotos** del gimnasio o del parque. Hoy se pregunta solo la marca de las máquinas (Technogym, Life Fitness, Hammer Strength, Matrix u otra) y el plan usa su catálogo.
+- **Predecir las cargas** de cada serie con IA, además de la fórmula actual.
+- **Ajustar el menú y las comidas** con IA.
+- **Plan de cardio** generado con IA.
+- **Explicar la técnica** de cualquier ejercicio.
+- **Calcular los macros** de un alimento que no está en la base de datos.
+
+Para que funcione para todos los usuarios hace falta un servidor propio con una clave de API, porque una web pública no puede guardar la clave de forma segura. Tiene coste por uso.
 
 ---
 
-## 4. Datos y copia de seguridad 🔜
-- **Exportar e importar** todos los datos (perfil, plan y registro) en un archivo, para no perderlos al borrar los datos de Safari o al cambiar de móvil.
-- Hoy en GitHub Pages todo vive solo en el navegador de cada dispositivo.
+## 4. Datos, cuentas y avisos
+- 🔜 **Exportar e importar** todos los datos (perfil, plan y registro) en un archivo, para no perderlos al borrar los datos de Safari o al cambiar de móvil. Hoy, en GitHub Pages, todo vive solo en el navegador de cada dispositivo.
+- ⏸️ **Cuenta y sincronización** entre móvil y ordenador. Necesita un servidor o un servicio de base de datos.
+- ⏸️ **Recordatorios de entreno y de revisión.** El cuestionario ya pregunta si quieres recibirlos, pero aún no se envían. En web necesitan notificaciones push; en app nativa son más sencillos.
+- ⏸️ **Privacidad y RGPD:** política de privacidad publicada, borrado de cuenta y revisión legal antes de abrir la app a más gente. Es obligatorio para Health Connect y para las tiendas.
+- ⏸️ **Quitar el bloque "Datos recogidos (JSON para desarrollo)"** del Inicio antes de una versión pública.
 
 ---
 
@@ -67,7 +77,13 @@ Pausada con `AI_PAUSED = true` en `index.html`.
 ## 6. Imagen y contenido ⏸️
 - **Fotos reales de los ejercicios** con el banco de prompts de `herramientas-imagenes/`, en lugar de las ilustraciones actuales.
 - **Color de marca propio** para sustituir el violeta de acento.
-- **Inicio:** permitir elegir y ordenar los widgets (el botón "+" ya existe).
+- **Inicio:** permitir elegir y ordenar los widgets. El botón "+" ya existe, pero solo muestra un aviso.
+- **Cuestionario en el ordenador:** las preguntas siguen en una columna centrada; se podría aprovechar más el ancho.
+
+---
+
+## 7. Validación profesional ⏸️
+- Revisión de los parámetros por un preparador físico, un fisioterapeuta (protocolo de lesiones) y un dietista-nutricionista (menús, fases y condiciones médicas), antes de un lanzamiento real.
 
 ---
 
