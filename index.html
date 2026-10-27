@@ -1135,6 +1135,8 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 .pdel{background:rgba(255,90,95,.1);border:1px solid rgba(255,90,95,.35);border-radius:14px;padding:12px}
 .pdel p{margin:0 0 10px;font-size:14px;color:#f0d6d7;text-align:left}.pdel div{display:flex;gap:8px;justify-content:flex-end}
 .btn.danger{background:#E5484D;border-color:#E5484D;color:#fff}
+.cfb{display:flex;gap:10px;justify-content:center}.cfb .btn{min-width:120px}
+.celb.cfm{background:#1A1A1E;border-radius:24px;padding:24px 20px;box-shadow:0 20px 60px rgba(0,0,0,.5)}.celb.cfm h3{font-size:24px}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -1709,7 +1711,7 @@ function act(a,el){
   else if(a==='start'){S.started=true;QDIR=1;save();render();return}
   else if(a==='buildok'){BUILD=0;curId='resumen';S.tab='hoy';save();render();toast('Plan creado');return}
   else if(a==='demo'){S={...DEMO,tab:'hoy'};curId='resumen';curQ=0;BUILD=0;errs.clear();msg='Datos de ejemplo cargados'}
-  else if(a==='reset'){S={...DEF};curId='modulo';curQ=0;BUILD=0;errs.clear();backToSummary=false;msg='Cuestionario reiniciado'}
+  else if(a==='reset'){confirmBox('¿Empezar de cero?','Se borran las respuestas, el plan y todo el registro de este perfil (series, días de enfermedad, pasos y logros). No se puede deshacer.','Empezar de cero',()=>{S={...DEF};REG={log:{},ai:{}};regSave();curId='modulo';curQ=0;BUILD=0;QMENU=false;errs.clear();backToSummary=false;save();render();toast('Perfil vacío: empieza el cuestionario')});return}
   else if(a==='activar'){S.modulo='Entrenamiento + nutrición';backToSummary=true;curId='nut2';curQ=0;msg='Nutrición activada'}
   else if(a==='gen'){genPlan();return}
   else if(a==='registro'){curId='registro'}
@@ -4072,6 +4074,9 @@ function afterLog(w,si,soft){const d=sesDone(w,si),ak=AK(w,si);REG.cel=REG.cel||
   if(d.n&&d.d===d.n&&!REG.cel[ak]){REG.cel={...REG.cel,[ak]:1};regSave();const ses=cycle()[si],vol=ses.ex.reduce((t,e)=>t+(REG.log[LK(w,si,e.name)]||[]).reduce((a,x)=>a+(x&&x.kg&&x.reps?x.kg*x.reps:0),0),0),sets=ses.ex.reduce((t,e)=>t+(REG.log[LK(w,si,e.name)]||[]).filter(x=>x&&x.reps).length,0),st=streak();
     const nb=newBadge();celebrate(st>1?String(st):'✓',st>1?`¡Sesión completada! Racha de ${st} días`:'¡Sesión completada!',`${esc(ses.name)}: ${sets} series${vol?` y ${fmt(Math.round(vol))} kg levantados en total`:''}.${nb?` Nuevo logro: ${esc(nb[1].toLowerCase())}.`:''}`);return}
   const b=newBadge();if(b){if(soft)setTimeout(()=>toast('Nuevo logro: '+b[1]),1200);else celebrate('★','Logro: '+b[1],b[2]+'.')}}
+function confirmBox(title,text,okLabel,onOk){document.querySelectorAll('.cel').forEach(x=>x.remove());const o=document.createElement('div');o.className='cel';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',title);
+  o.innerHTML=`<div class="celb cfm"><h3>${esc(title)}</h3><p>${esc(text)}</p><div class="cfb"><button type="button" class="btn" data-c="no">Cancelar</button><button type="button" class="btn danger" data-c="ok">${esc(okLabel)}</button></div></div>`;document.body.appendChild(o);
+  o.addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;o.remove();if(b.dataset.c==='ok')onOk()});o.querySelector('[data-c="no"]').focus()}
 function celebrate(big,title,text){document.querySelectorAll('.cel').forEach(x=>x.remove());const o=document.createElement('div');o.className='cel';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',title);
   o.innerHTML=`<canvas aria-hidden="true"></canvas><div class="celb"><div class="celbig">${big}</div><h3>${title}</h3><p>${text}</p><button type="button" class="qcta">Genial</button></div>`;document.body.appendChild(o);
   o.querySelector('button').addEventListener('click',()=>o.remove());o.querySelector('button').focus();if(!matchMedia('(prefers-reduced-motion: reduce)').matches)qConfetti(o.querySelector('canvas'))}
