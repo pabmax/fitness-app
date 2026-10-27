@@ -39,7 +39,7 @@
 
 | | |
 |---|---|
-| 🧭 **Cuestionario inicial** | Perfil, gimnasio (por marca de máquinas), salud y condiciones médicas, lesiones, medidas, nutrición y objetivos. En 8 pasos. |
+| 🧭 **Cuestionario inicial** | Una pregunta por pantalla, con tarjetas, ruedas para edad, altura y peso, una silueta para marcar la lesión, una previsión a 10 semanas y la creación del plan en directo. |
 | 🏋️ **Entrenamiento** | Plan semanal que combina fuerza, deportes y cardio. Volumen por músculo, bloques de 5 semanas con descarga, sustitutos de ejercicios y hora de entreno por día. |
 | 🩹 **Lesiones** | Readaptación progresiva de la zona lesionada, integrada en el plan. |
 | 📈 **Registro y progreso** | Series con peso, repeticiones y RIR, predicción de cargas, gráficas por sesión, ejercicio y bloque. Incluye una simulación de 10 semanas. |
