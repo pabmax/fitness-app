@@ -8,7 +8,9 @@ Ideas y mejoras aparcadas para ir escalando la app. Cada punto recoge lo ya deci
 
 ## 1. Pasos y datos de salud
 
-### 1.1 Pasos sin coste ⏸️
+### 1.1 Pasos sin coste ✅ (versión web)
+Hecho: widget de pasos en Inicio, ficha con los últimos 7 días, meta diaria editable, entrada manual y recepción de pasos por enlace (`?pasos=8432`, opcional `&fecha=AAAA-MM-DD`) desde un atajo de iPhone. Pendiente: que el atajo funcione con la app instalada en la pantalla de inicio (iOS la guarda aparte de Safari; necesita cuenta o servidor).
+
 Objetivo: un anillo de pasos en Inicio, calorías del día ajustadas a lo que te mueves de verdad y un widget con la media semanal.
 
 - **iPhone · Atajo de Apple (recomendado).** Un atajo lee los pasos de Salud y abre la app con el número en el enlace, por ejemplo `pabmax.github.io/fitness-app/?pasos=8432`.

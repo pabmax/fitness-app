@@ -1108,6 +1108,25 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 .celb p{color:#9a9aa3;margin:0 0 16px}
 .celb .qcta{max-width:260px}
 @keyframes celin{from{opacity:0}to{opacity:1}}
+
+/* ---------- Pasos ---------- */
+.stw .stwr{display:flex;align-items:center;gap:10px;margin:6px 0 2px}.stw .stwr b{font:700 24px var(--f-ui);font-variant-numeric:tabular-nums}
+.stsheet{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.sthero{display:flex;align-items:center;gap:18px}.sthero b{display:block;font:800 44px/1 var(--f-q);color:#fff;font-variant-numeric:tabular-nums}.sthero span{color:#9a9aa3;font-size:14px}
+.stchart{position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:8px;height:170px;align-items:end;background:#141418;border-radius:18px;padding:12px 12px 8px}
+.stb{display:grid;grid-template-rows:16px 1fr 18px;height:100%;text-align:center;gap:4px}
+.stv{font:600 10.5px var(--f-ui);color:#9a9aa3;font-variant-numeric:tabular-nums}
+.stbar{position:relative;display:flex;align-items:flex-end;justify-content:center}.stbar i{display:block;width:70%;max-width:26px;border-radius:7px 7px 3px 3px;transition:height .5s}
+.stb b{font:600 12px var(--f-ui);color:#9a9aa3}.stb.today b{color:#fff}
+.stgoal{position:absolute;left:12px;right:12px;height:0;border-top:1.5px dashed rgba(43,212,106,.55);pointer-events:none;margin-bottom:30px}
+.stgoal span{position:absolute;right:0;top:-16px;font:600 10px var(--f-ui);color:#2BD46A}
+.stkv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stkv>div{background:#1A1A1E;border-radius:16px;padding:10px 12px}
+.stkv small{display:block;color:#9a9aa3;font-size:12px}.stkv b{font:700 18px var(--f-ui);color:#fff;font-variant-numeric:tabular-nums}
+.stgs{display:flex;align-items:center;gap:6px}.stgs button{all:unset;cursor:pointer;width:24px;height:24px;border-radius:50%;background:#2A2A33;color:#fff;display:grid;place-items:center;font-size:15px}.stgs b{font-size:15px}
+.stman{display:flex;gap:8px}.stman input{flex:1;min-width:0}.stman .btn{flex:none}
+.stcon{background:#1A1A1E;border-radius:16px}.stcon summary{padding:13px 14px;font:600 14.5px var(--f-ui)}
+.stcon ol{margin:0;padding:0 16px 4px 34px;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;font-size:14px;color:#d6d6de}.stcon p{padding:0 14px 12px;margin:6px 0 0}
+.stcopy{display:flex;gap:8px;align-items:center;margin-top:6px;background:#0B0B0D;border-radius:10px;padding:6px 6px 6px 10px}.stcopy code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;font:500 12.5px var(--f-mono);color:#B3A9FF}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -1612,7 +1631,7 @@ function deskLayout(){document.body.classList.toggle('desk',!!DESK.matches&&!!ap
     const all=kids(app).filter(e=>!e.matches('.rvtop,.bnavsp,.bnav,.mp-av,.sheetwrap,.srch,.pick'));const m=all.filter(e=>e.matches('.mpl'));
     mk('dk-mp',[m[0]],all.filter(e=>e!==m[0]),app,nav);return;}
 }
-function render(keep){saludMigrate();renderMain(keep);deskLayout();drawThumbs();if(INFO)app.innerHTML+=infoHTML();if(RSHEET)app.innerHTML+=recipeSheetHTML();if(SKS)app.innerHTML+=sickSheetHTML();if(PICK)app.innerHTML+=pickHTML();if(SRCH){app.innerHTML+=srchHTML();const qi=document.getElementById('srchq');if(qi&&SRCH.focus){qi.focus();SRCH.focus=false}}if(SHEET){app.innerHTML+=sheetHTML();if(typeof document.getElementById==='function'&&FIG.has(SHEET))FIG.animate(document.getElementById('figanim'),SHEET)}qMount();ringAnim()}
+function render(keep){saludMigrate();renderMain(keep);deskLayout();drawThumbs();if(INFO)app.innerHTML+=infoHTML();if(RSHEET)app.innerHTML+=recipeSheetHTML();if(SKS)app.innerHTML+=sickSheetHTML();if(STPS)app.innerHTML+=stepsSheetHTML();if(PICK)app.innerHTML+=pickHTML();if(SRCH){app.innerHTML+=srchHTML();const qi=document.getElementById('srchq');if(qi&&SRCH.focus){qi.focus();SRCH.focus=false}}if(SHEET){app.innerHTML+=sheetHTML();if(typeof document.getElementById==='function'&&FIG.has(SHEET))FIG.animate(document.getElementById('figanim'),SHEET)}qMount();ringAnim()}
 function renderMain(keep){
   if(curId==='progreso'){
     app.innerHTML=rvTop()+`<div class="meta" style="margin-top:14px"><button class="link" data-tab="miplan">← Mi plan</button><span class="count">Ciclo actual</span></div><h1>Tu progreso</h1>${progHTML()}${bnavHTML('seg')}`;
@@ -1704,6 +1723,10 @@ function act(a,el){
   else if(a==='pickprof'){PICK=true;render(true);return}
   else if(a==='pickclose'){PICK=false;render(true);return}
   else if(a==='qmenu'){QMENU=!QMENU;render(true);return}
+  else if(a==='steps'){STPS=true;render(true);return}
+  else if(a==='closesteps'){STPS=false;render(true);return}
+  else if(a==='stsave'){const i=document.getElementById('stin');if(i&&i.value!==''&&setSteps(ymd(new Date()),i.value,'manual')){render(true);toast('Pasos de hoy: '+fmt(+i.value))}else if(i)i.focus();return}
+  else if(a==='stcopy'){const t=APPURL+'?pasos=';const ok=()=>toast('Enlace copiado');try{navigator.clipboard.writeText(t).then(ok,()=>{fallbackCopy(t);ok()})}catch(er){fallbackCopy(t);ok()}return}
   else if(a==='streak'){const n=streak();toast(n?`Racha de ${n} día${n>1?'s':''}: registra algo cada día de entreno para mantenerla`:'Registra tu primera serie para empezar una racha');return}
   else if(a==='search'){SRCH={q:'',focus:true};render(true);return}
   else if(a==='srchclose'){SRCH=null;render(true);return}
@@ -1807,6 +1830,7 @@ app.addEventListener('click',e=>{
   const rw=e.target.closest('[data-regw]');if(rw){S.regW=+rw.dataset.regw;AIP.st==='err'&&(AIP={});save();render(true);return}
   const rs=e.target.closest('[data-regs]');if(rs){S.regS=+rs.dataset.regs;AIP.st==='err'&&(AIP={});save();render(true);return}
   const ai=e.target.closest('[data-aises]');if(ai){S.aiSel=+ai.dataset.aises;save();render(true);return}
+  const sg=e.target.closest('[data-stgoal]');if(sg){S.pasosMeta=Math.max(2000,Math.min(30000,stepGoal()+ +sg.dataset.stgoal));save();render(true);toast('Meta: '+fmt(S.pasosMeta)+' pasos');return}
   const qs=e.target.closest('[data-qset]');if(qs){const [w,si]=qs.dataset.qset.split('|').map(Number);quickSet(w,si);return}
   const bdg=e.target.closest('[data-badge]');if(bdg){const b=BADGES.find(x=>x[0]===bdg.dataset.badge),{got}=badgeState();if(b)toast((got[b[0]]?'Conseguido: ':'Pendiente: ')+b[2]);return}
   const bz=e.target.closest('[data-bz]');if(bz){bzPick(bz.dataset.bz);return}
@@ -3226,10 +3250,10 @@ function planBlock(p){
 /* ---------- Registro del ciclo y predicción de cargas ---------- */
 let VC=null;
 const curC=()=>REG.cur||1,LK=(w,si,n,c)=>'c'+(c||curC())+'|'+w+'|'+si+'|'+n,AK=(w,si,c)=>'c'+(c||curC())+'|'+w+'|'+si;
-function migrate(r){const fix=o=>{const n={};Object.entries(o||{}).forEach(([k,v])=>n[/^c\d+\|/.test(k)?k:'c1|'+k]=v);return n};return {log:fix(r.log),ai:fix(r.ai),cur:r.cur||1,demo:r.demo,cardio:r.cardio||{},cardioAI:r.cardioAI||{}}}
+function migrate(r){const fix=o=>{const n={};Object.entries(o||{}).forEach(([k,v])=>n[/^c\d+\|/.test(k)?k:'c1|'+k]=v);return n};return {...r,log:fix(r.log),ai:fix(r.ai),cur:r.cur||1,demo:r.demo,cardio:r.cardio||{},cardioAI:r.cardioAI||{}}}
 let DBBASE=null;
 async function dbLoad(){if(!DBBASE)return;const ref=DBBASE.db.doc('data/users/'+DBBASE.id+'/registro'+(PROF.cur==='p1'?'':'-'+PROF.cur));DB=null;const snap=await ref.get();
-  if(snap.exists){const d=snap.data();try{const p=JSON.parse(String(d&&d.json||'{}'));if(p&&p.log)REG=migrate(p)}catch(e){}}DB=ref;}
+  if(snap.exists){const d=snap.data();try{const p=JSON.parse(String(d&&d.json||'{}'));if(p&&p.log)REG=migrate(p)}catch(e){}}DB=ref;if(PSTEP){setSteps(PSTEP.k,PSTEP.v,'salud')}}
 let REG={log:{},ai:{}},DB=null,DL=null,regSaving=false,regDirty=false,regTimer=null,AIP={},EXP='';
 const NAME2REQ={};Object.values(EX).forEach(l=>l.forEach(([n,r])=>{if(!(n in NAME2REQ))NAME2REQ[n]=r}));
 try{const r=JSON.parse(localStorage.getItem(rKey())||'null');if(r&&r.log)REG=migrate(r)}catch(e){}
@@ -3979,7 +4003,7 @@ function rvHomeHTML(OW,w,r){const ti=todayI(),D=OW.day[ti],p=plan(),si=p.pattern
   const tg=topGains(1)[0],tgPts=tg?exSeries(tg.nm).filter(x=>!x.bw).map(x=>x.y):null;
   const shopC=nut(S)&&S.provincia&&PROVS[S.provincia]?(()=>{const L=shopList();if(!L)return null;const ch=chainsFor(S.provincia).map(c=>({c,v:shopCost(L)*OCUIDX[c]/105})).sort((a,b)=>a.v-b.v)[0];return ch})():null;
   const re=new Date();re.setDate(re.getDate()+35);
-  const tiles=[`<button type="button" class="rvwt" data-tab="entreno"><small>Esta semana</small><b>${doneS} de ${strDays.length}</b><em style="color:var(--muted)">sesiones completadas</em><span class="bar"><i style="width:${strDays.length?Math.round(doneS/strDays.length*100):0}%"></i></span></button>`,
+  const tiles=[stepsWidget(),`<button type="button" class="rvwt" data-tab="entreno"><small>Esta semana</small><b>${doneS} de ${strDays.length}</b><em style="color:var(--muted)">sesiones completadas</em><span class="bar"><i style="width:${strDays.length?Math.round(doneS/strDays.length*100):0}%"></i></span></button>`,
     `<button type="button" class="rvwt" data-act="progreso"><small>Fuerza</small><b>${tg?'+'+fmt(tg.g*100,0)+' %':'—'}</b><em style="color:${tg?'#2BD46A':'var(--muted)'}">${tg?'▲ '+esc(tg.nm.toLowerCase()):'aún sin registros'}</em>${tgPts?spark(tgPts,'#2BD46A'):''}</button>`,
     REG.sim?`<button type="button" class="rvwt" data-act="progreso"><small>Peso · media</small><b>${fmt(REG.sim.peso.slice(-3).reduce((a,b)=>a+b,0)/3,1)} kg</b><em style="color:var(--muted)">${fmt(REG.sim.peso.slice(-3).reduce((a,b)=>a+b,0)/3-REG.sim.peso[0],1)} kg desde el inicio</em>${spark(REG.sim.peso,'#7B6CFF')}</button>`:`<button type="button" class="rvwt" data-tab="nutri"><small>Fase</small><b style="font-size:19px">${esc(nut(S)?curPhase().replace(/ \(.*\)/,''):S.objetivo||'—')}</b><em style="color:var(--muted)">${np?fmt(np.avg)+' kcal de media':'objetivo'}</em></button>`,
     shopC?`<button type="button" class="rvwt" data-tab="compra"><small>Compra de la semana</small><b>${eur(shopC.v)}</b><em style="color:var(--muted)">en ${esc(shopC.c)}</em><span class="bar"><i style="width:${Math.min(100,shopC.v/(S.shopBudget||70)*100).toFixed(0)}%;background:${shopC.v>(S.shopBudget||70)?'#FF5A5F':'#7B6CFF'}"></i></span></button>`:`<button type="button" class="rvwt" data-act="registro"><small>Registro</small><b>${loggedSessions(curC()).length}</b><em style="color:var(--muted)">sesiones en el bloque ${curC()}</em></button>`,
@@ -4031,6 +4055,43 @@ let RINGDONE=false;
 function ringAnim(){if(RINGDONE||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const cs=[...document.querySelectorAll('.rvbal svg circle[stroke-dasharray]')];if(!cs.length)return;RINGDONE=true;
   cs.forEach((c,i)=>{const da=c.getAttribute('stroke-dasharray'),C=da.split(' ')[1];c.style.strokeDasharray='0 '+C;c.getBoundingClientRect();c.style.transition=`stroke-dasharray .9s cubic-bezier(.3,.7,.2,1) ${i*.12}s`;c.style.strokeDasharray=da});
   const nm=document.querySelector('.rvbal .num');if(nm){const t=nm.firstChild,v=parseInt(String(t.textContent).replace(/\D/g,''));if(v){const t0=performance.now(),f=x=>{const p=Math.min(1,(x-t0)/900),e=1-Math.pow(1-p,3);t.textContent=fmt(Math.round(v*e));if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)}}}
+
+/* ---------- Pasos: llegan de Salud (atajo de iPhone), de un enlace o a mano. Solo se muestran ---------- */
+let STPS=false,PSTEP=null;
+const APPURL='https://pabmax.github.io/fitness-app/';
+const stepGoal=()=>S.pasosMeta||({'Menos de 5.000':6000,'5.000–8.000':8000,'8.000–12.000':10000,'Más de 12.000':12000}[S.pasos]||8000);
+function stepsDays(n){const out=[],d=new Date();for(let i=n-1;i>=0;i--){const x=new Date(d);x.setDate(d.getDate()-i);const k=ymd(x);out.push({k,d:x,v:(REG.steps||{})[k]})}return out}
+function setSteps(k,v,src){v=Math.round(+v);if(!(v>=0&&v<200000))return false;REG.steps={...(REG.steps||{}),[k]:v};REG.stepsSrc={...(REG.stepsSrc||{}),[k]:src||'manual'};regSave();return true}
+/* Lee ?pasos=8432 (GitHub Pages) o #pasos-8432 (enlace de Claude); opcional ?fecha=AAAA-MM-DD */
+function stepsFromUrl(){try{const q=new URLSearchParams(location.search);let v=q.get('pasos'),f=q.get('fecha');const h=location.hash.match(/^#pasos-(\d+)(?:-(\d{4}-\d{2}-\d{2}))?$/);if(!v&&h){v=h[1];f=h[2]}
+  if(v==null)return;const k=/^\d{4}-\d{2}-\d{2}$/.test(f||'')?f:ymd(new Date());
+  PSTEP={k,v};if(setSteps(k,v,'salud'))setTimeout(()=>toast(`Pasos ${k===ymd(new Date())?'de hoy':'del '+k}: ${fmt(+v)}`),600);
+  q.delete('pasos');q.delete('fecha');const qs=q.toString();history.replaceState(null,'',location.pathname+(qs?'?'+qs:''))}catch(e){}}
+function stepsRing(v,goal,size){const C=2*Math.PI*44,p=Math.min(1,(v||0)/goal);return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true" style="transform:rotate(-90deg)"><circle cx="50" cy="50" r="44" fill="none" stroke="#2BD46A" stroke-opacity=".18" stroke-width="9"/><circle class="stpr" cx="50" cy="50" r="44" fill="none" stroke="#2BD46A" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(C*p).toFixed(1)} ${C.toFixed(1)}"/></svg>`}
+function stepsWidget(){const t=stepsDays(7),today=t[6].v,goal=stepGoal(),has=t.filter(x=>x.v!=null),avg=has.length?Math.round(has.reduce((a,x)=>a+x.v,0)/has.length):null;
+  return `<button type="button" class="rvwt stw" data-act="steps"><small>Pasos de hoy</small><span class="stwr">${stepsRing(today,goal,46)}<b>${today!=null?fmt(today):'—'}</b></span><em style="color:var(--muted)">${today!=null?Math.round(today/goal*100)+' % de '+fmt(goal):has.length?'media '+fmt(avg)+' al día':'Toca para conectar'}</em>${has.length>1?spark(t.map(x=>x.v||0),'#2BD46A'):''}</button>`}
+function stepsSheetHTML(){const t=stepsDays(7),goal=stepGoal(),today=t[6],has=t.filter(x=>x.v!=null),avg=has.length?Math.round(has.reduce((a,x)=>a+x.v,0)/has.length):null,mx=Math.max(goal,...has.map(x=>x.v))*1.1,DL=['D','L','M','X','J','V','S'];
+  const src=(REG.stepsSrc||{})[today.k],ios=/iPhone|iPad|Mac/.test(navigator.userAgent),url=APPURL+'?pasos=';
+  const bars=t.map(x=>`<div class="stb${x.k===today.k?' today':''}"><span class="stv">${x.v!=null?(x.v>=1000?(x.v/1000).toFixed(1).replace('.',',')+'k':x.v):''}</span><span class="stbar"><i style="height:${x.v?Math.max(3,x.v/mx*100):0}%;background:${x.v>=goal?'#2BD46A':'#2BD46A99'}"></i></span><b>${DL[x.d.getDay()]}</b></div>`).join('');
+  return `<div class="sheetwrap" role="dialog" aria-modal="true" aria-label="Pasos"><div class="sheetbg" data-act="closesteps"></div><div class="sheet stsheet">
+   <div class="sheeth"><div><span class="sec">Actividad</span><h2>Pasos</h2></div><button class="ghostbtn" data-act="closesteps">Cerrar</button></div>
+   <div class="sthero">${stepsRing(today.v,goal,132)}<div><b>${today.v!=null?fmt(today.v):'—'}</b><span>de ${fmt(goal)} hoy${src?` · ${src==='salud'?'desde Salud':'a mano'}`:''}</span></div></div>
+   <div class="stchart" role="img" aria-label="Pasos de los últimos 7 días">${bars}</div><p class="volnote" style="margin:-6px 0 0">Verde intenso: días en los que llegaste a la meta.</p>
+   <div class="stkv"><div><small>Media 7 días</small><b>${avg!=null?fmt(avg):'—'}</b></div><div><small>Días con meta</small><b>${has.filter(x=>x.v>=goal).length} de 7</b></div><div><small>Meta diaria</small><span class="stgs"><button type="button" data-stgoal="-1000" aria-label="Bajar meta">−</button><b>${fmt(goal)}</b><button type="button" data-stgoal="1000" aria-label="Subir meta">+</button></span></div></div>
+   <h3 class="subh">Anotar a mano</h3>
+   <div class="stman"><input class="txt" id="stin" type="number" inputmode="numeric" min="0" max="199999" placeholder="Pasos de hoy" value="${today.v??''}" aria-label="Pasos de hoy"><button type="button" class="btn primary" data-act="stsave">Guardar</button></div>
+   <h3 class="subh">Conectar con Salud de Apple</h3>
+   <details class="stcon"${ios?' open':''}><summary>Atajo de iPhone: pasa tus pasos solo cada noche</summary><ol>
+     <li>Abre <b>Atajos</b> y crea un atajo nuevo llamado <b>Pasos a Fitness</b>.</li>
+     <li>Añade <b>Buscar muestras de salud</b>: Tipo <b>Pasos</b>, Fecha de inicio <b>es hoy</b> y <b>Agrupar por: Día</b>.</li>
+     <li>Añade <b>Obtener detalles de muestras de salud</b> → <b>Valor</b>, y después <b>Redondear número</b>.</li>
+     <li>Añade <b>URL</b> con este texto y, al final, la variable <b>Número redondeado</b>:<div class="stcopy"><code id="sturl">${esc(url)}</code><button type="button" class="mbtn" data-act="stcopy">Copiar</button></div></li>
+     <li>Añade <b>Abrir URLs</b>. Pruébalo: se abre la app y verás los pasos de hoy.</li>
+     <li>En <b>Automatización</b> → <b>Nueva</b> → <b>Hora del día</b> (por ejemplo, 23:30, cada día) → <b>Ejecutar inmediatamente</b> → elige el atajo.</li></ol>
+     <p class="volnote">Al ejecutarse abre Safari un momento. Si la cifra no coincide con la app Salud, revisa que <b>Agrupar por</b> esté en <b>Día</b>.</p></details>
+   <h3 class="subh">Google Fit, Health Connect y Samsung Health</h3>
+   <p class="volnote" style="margin-top:0">Desde una web no se puede leer Health Connect, y Google Fit ya no admite apps nuevas. En Android, anota los pasos a mano con la cifra de tu app de salud. La conexión automática llegará con la app nativa.</p>
+  </div></div>`}
 /* Buscador */
 let SRCH=null,QMENU=false;
 function srchRes(q){q=normTxt(q||'').trim();const ex=[...new Set(Object.keys(NAME2REQ))].filter(n=>!q||normTxt(n).includes(q)).slice(0,8);
@@ -4166,6 +4227,7 @@ function summary(){
   if(tab==='miplan')return miPlanHTML();
   return rvHomeHTML(OW,twk,r)+P_al.replace(/^<p class="intro">.*?<\/p>/,'')+`<details class="hsec"><summary>Punto de partida<span>peso, IMC, % grasa${showE?', gasto diario':''}</span></summary><div class="hsecb">${P_st}</div></details>`+P_end;
 }
+stepsFromUrl();
 render();
 </script>
 
