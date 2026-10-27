@@ -86,10 +86,14 @@ python herramientas-imagenes/generar_lote.py --prueba 4
 
 ## 🛣️ Próximos pasos
 
+Todo lo pendiente, con lo ya decidido para cada punto, está en **[ROADMAP.md](ROADMAP.md)**:
+
+- [ ] Pasos y datos de salud (atajo de iPhone, entrada manual, Apple Salud y Health Connect)
+- [ ] App nativa para iPhone y Android con Capacitor
 - [ ] Volver a activar las funciones de IA con un servidor propio
-- [ ] Fotos reales de los ejercicios
-- [ ] Lista de la compra conjunta entre perfiles
-- [ ] Color de marca propio
+- [ ] Exportar e importar datos como copia de seguridad
+- [ ] Mejoras de la lista de la compra
+- [ ] Fotos reales de los ejercicios y color de marca propio
 
 ---
 
