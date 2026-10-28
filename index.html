@@ -1178,6 +1178,7 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 .ctip i{font:800 13px var(--f-q);font-style:normal;width:24px;height:24px;border-radius:50%;background:#7B6CFF;color:#fff;display:grid;place-items:center;flex:none}
 .ctip p{margin:0;font-size:13.5px;color:#d9d6ef;flex:1;min-width:0}.ctip p b{color:#fff}
 .ctip button{all:unset;cursor:pointer;color:#B3A9FF;font:600 13px var(--f-ui);padding-top:2px}.ctip button:focus-visible{outline:2px solid #B3A9FF}
+@keyframes mflash{0%,100%{box-shadow:0 0 0 0 rgba(123,108,255,0)}30%{box-shadow:0 0 0 3px rgba(123,108,255,.8)}}.meal.mflash{animation:mflash 1.4s}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -1881,7 +1882,8 @@ app.addEventListener('click',e=>{
   const mv=e.target.closest('[data-mov]');if(mv){const [k,dl]=mv.dataset.mov.split('|'),np=nutPlan(),b=nutPlan(true),cur=k==='p'?np.pkg:np.fkg,lim=k==='p'?[.6,3.5]:[.4,2],v=Math.round(Math.min(lim[1],Math.max(lim[0],cur+ +dl))*10)/10,def=Math.round((k==='p'?b.pkg:b.fkg)*10)/10,ov={...(S.macroOv||{})};
     if(v===def)delete ov[k];else ov[k]=v;S.macroOv=ov;save();render(true);const n2=nutPlan(),dg=k==='p'?n2.P-np.P:n2.F-np.F;toast(`${k==='p'?'Proteína':'Grasas'}: ${f1(v)} g/kg (${dg>=0?'+':''}${dg} g al día)`);return}
   const mr=e.target.closest('[data-movreset]');if(mr){S.macroOv={};save();render(true);toast('Macros de la base científica restablecidos');return}
-  const mo=e.target.closest('[data-mopen]');if(mo){S.menuOpen=S.menuOpen===mo.dataset.mopen?null:mo.dataset.mopen;save();render(true);return}
+  const mo=e.target.closest('[data-mopen]');if(mo){const k=mo.dataset.mopen,hero=!!mo.closest('.nfhero');S.menuOpen=hero?k:(S.menuOpen===k?null:k);save();render(true);
+    if(hero){const t=[...document.querySelectorAll('.meal [data-mopen]')].find(x=>x.dataset.mopen===k);const m=t&&t.closest('.meal');if(m){m.scrollIntoView({behavior:'smooth',block:'start'});m.classList.add('mflash');setTimeout(()=>m.classList.remove('mflash'),1400)}}return}
   const mp=e.target.closest('[data-mpick]');if(mp){const v=mp.dataset.mpick,ix=v.lastIndexOf('|'),k=v.slice(0,ix),rid=+v.slice(ix+1);S.menuPick={...(S.menuPick||{}),[k]:rid};S.menuOpen=null;const fromSheet=!!RSHEET;RSHEET=null;save();render(true);const nb=document.querySelector('[data-mswap="'+CSS.escape(k)+'"]'),nm=nb&&nb.closest('.meal')&&nb.closest('.meal').querySelector('.mealh b');toast('Plato elegido'+(nm?': '+nm.textContent:''));if(fromSheet&&nb)nb.closest('.meal').scrollIntoView({block:'center'});return}
   const msw=e.target.closest('[data-mswap]');if(msw){const k=msw.dataset.mswap;if(S.menuPick&&S.menuPick[k]!=null){const mp2={...S.menuPick};delete mp2[k];S.menuPick=mp2}S.menuSwap={...(S.menuSwap||{}),[k]:((S.menuSwap||{})[k]||0)+1};save();render(true);const nb=document.querySelector('[data-mswap="'+CSS.escape(k)+'"]'),nm=nb&&nb.closest('.meal')&&nb.closest('.meal').querySelector('.mealh b');toast('Plato cambiado'+(nm?': '+nm.textContent:''));return}
   const ndb=e.target.closest('[data-nday]');if(ndb){S.nutD=S.trD=+ndb.dataset.nday;save();render(true);return}
