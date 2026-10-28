@@ -46,6 +46,7 @@
 | 🥗 **Nutrición** | Fases (mantenimiento, volumen, definición, recomposición), macros por día según la carga, macros editables por kg y menú semanal con recetas paso a paso. Las comidas pre y post entreno se adaptan al tiempo que falta para entrenar. |
 | 🤒 **Modo enfermo** | Marca los días de enfermedad desde Entreno o Nutrición: el plan, la dieta y el histórico se adaptan sin contarlo como fallo, con una vuelta gradual. |
 | 🛒 **Lista de la compra** | Se genera desde el menú, con checklist por secciones del súper, presupuesto y comparativa del precio medio entre supermercados de tu provincia. |
+| ❓ **Tutorial y ayuda** | Tutorial de 5 pasos al empezar, botón de ayuda siempre visible con buscador, guías y preguntas frecuentes, y pistas la primera vez que entras en cada sección. |
 | 👥 **Perfiles** | Varias personas en el mismo dispositivo, cada una con su plan. |
 | 🔬 **Base científica** | Fuentes de cada parámetro, separando evidencia y criterio práctico. |
 
