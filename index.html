@@ -4384,8 +4384,25 @@ function rvHomeHTML(OW,w,r){const ti=todayI(),D=OW.day[ti],p=plan(),si=p.pattern
     shopC?`<button type="button" class="rvwt" data-tab="compra"><small>Compra de la semana</small><b>${eur(shopC.v)}</b><em style="color:var(--muted)">en ${esc(shopC.c)}</em><span class="bar"><i style="width:${Math.min(100,shopC.v/(S.shopBudget||70)*100).toFixed(0)}%;background:${shopC.v>(S.shopBudget||70)?'#FF5A5F':'#7B6CFF'}"></i></span></button>`:`<button type="button" class="rvwt" data-act="registro"><small>Registro</small><b>${loggedSessions(curC()).length}</b><em style="color:var(--muted)">sesiones en el bloque ${curC()}</em></button>`,
     `<button type="button" class="rvwt" data-tab="miplan"><small>Próxima revisión</small><b style="font-size:19px">${re.toLocaleDateString('es-ES',{day:'numeric',month:'short'})}</b><em style="color:var(--muted)">medidas y objetivos</em></button>`,
     S.lesion==='Sí'?`<button type="button" class="rvwt" data-tab="entreno"><small>${esc((ZONAG[S.zona]||[S.zona||'Lesión'])[0].replace(/^./,c=>c.toUpperCase()))}</small><b>${S.dolorMov??0}/10</b><em style="color:${(S.dolorMov??0)<=3?'#2BD46A':(S.dolorMov??0)<=5?'#FFB340':'#FF5A5F'}">● ${(S.dolorMov??0)<=3?'semáforo verde':(S.dolorMov??0)<=5?'semáforo ámbar':'semáforo rojo'}</em></button>`:`<button type="button" class="rvwt" data-tab="nutri"><small>Proteína de hoy</small><b>${wd?wd.p+' g':'—'}</b><em style="color:var(--muted)">${np?fmt(np.pkg,1)+' g por kg':''}</em></button>`];
-  return `${bal}<div class="rvdots"><i class="on"></i><i></i><i></i></div>${acts}${si>=0&&!skT?quickHTML(w,si):(!skT?sportQuickHTML(w,ti,D):'')}${promo}${card}${badgesHTML()}<div class="rvsec">Widgets<button type="button" data-act="widgets" aria-label="Añadir widget">+</button></div><div class="rvw" style="margin-top:6px">${tiles.join('')}</div><div style="height:10px"></div>`;}
+  return `${bal}<div class="rvdots"><i class="on"></i><i></i><i></i></div>${acts}${si>=0&&!skT?quickHTML(w,si):(!skT?sportQuickHTML(w,ti,D):'')}${promo}${card}${badgesHTML()}<div class="rvsec">Widgets<button type="button" data-act="widgets" aria-label="Añadir widget">+</button></div><div class="rvw" style="margin-top:6px">${tiles.join('')}</div>${planInfoHTML()}<div style="height:10px"></div>`;}
 
+
+/* Información fija del plan: se consulta desde Inicio en un desplegable, una sola vez */
+function planInfoHTML(){const d=S,r=calc(),p=plan(),OW=optimizeWeek();
+  const notes=[];
+  if(d.edad>=65)notes.push('Incluye equilibrio, fuerza funcional y prevención de caídas, con progresión más gradual.');
+  if(r.minor)notes.push('Técnica primero y cargas moderadas, con supervisión recomendada.');
+  if(sportsList().length)notes.push('Semana organizada junto a '+esc(sportsList().map(spName).join(', ').toLowerCase())+': mira el calendario.');
+  if(d.rendimiento&&d.deporte)notes.push(`Bloque específico de ${esc((d.deporteDet||d.deporte).toLowerCase())}${d.fechaPrueba?', periodizado hacia el '+new Date(d.fechaPrueba+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}):''}.`);
+  if(d.sueno==='Menos de 6'||d.estres>=4)notes.push('Volumen inicial algo más bajo por sueño o estrés; se sube si recuperas bien.');
+  return `<details class="volx pinfo hinfo"${PINFO?' open':''}><summary>Cómo está montado tu plan<small>Objetivo, esquema, material, ajustes y por qué tu semana está así</small></summary><div class="pinfob">
+   ${OW.why.length?`<h4 class="rhsub">Tu semana</h4><ul class="why">${OW.why.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+   <dl class="kv"><dt>Objetivo</dt><dd>${esc(d.objetivo||'—')}${d.secundario?' · '+esc(d.secundario.toLowerCase()):''}</dd>
+   <dt>Nivel</dt><dd>${esc(d.nivel||'—')}</dd>
+   <dt>Esquema</dt><dd>${esc(p.reps)}</dd>
+   <dt>Material</dt><dd>${(d.lugares||[]).map(l=>esc(l)+(l==='Gimnasio'?(gymF(d)?` (${inv(l).size} elementos de tus fotos)`:' (plan genérico)'):l==='Parque de barras'?` (${inv(l).size} elementos)`:` (${inv(l).size?inv(l).size+' elementos':'peso corporal'})`)).join('<br>')||'—'}</dd>
+   ${notes.length?`<dt>Ajustes</dt><dd>${notes.join('<br>')}</dd>`:''}</dl>
+   <h4 class="rhsub">Volumen semanal por músculo</h4>${volInner()}</div></details>`;}
 /* ---------- Motivación diaria: racha, series con un toque, logros y celebraciones ---------- */
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 function markDay(){REG.days=REG.days||{};const k=ymd(new Date());if(!REG.days[k]){REG.days={...REG.days,[k]:1};regSave()}}
@@ -4615,26 +4632,13 @@ function summary(){
   const week=days.map((dn,i)=>{const D=OW.day[i],it=[],car=OW.cardio.includes(i);if(sickAt(tw0,i))return `<button type="button" class="day2 sick" data-tday="${i}" aria-pressed="${i===tdSel}" aria-label="Ver ${DSEM[i]}: ${ENF().toLowerCase()}"><b>${dn}</b><span class="it sk">${THERMO}</span></button>`;if(D.str)it.push(`<span class="it str">${esc(D.str)}</span>`);D.sp.forEach(x=>it.push(`<span class="it spt">${esc(x.name)}</span>`));if(car)it.push('<span class="it car">Cardio</span>');
     const ld=Math.min(4,D.load+(car?1:0));return `<button type="button" class="day2${it.length?'':' rest'}" data-tday="${i}" aria-pressed="${i===tdSel}" aria-label="Ver ${DSEM[i]}"><b>${dn}</b>${it.join('')||'<span class="it rst">Descanso</span>'}<i class="ldb" title="Carga del día"><i style="width:${ld*25}%" class="lv${ld>=4?3:ld>=3?2:1}"></i></i></button>`}).join('');
   const twk=Math.min(5,Math.max(1,S.trW||1));
-  const notes=[];
-  if(d.edad>=65)notes.push('Incluye equilibrio, fuerza funcional y prevención de caídas, con progresión más gradual.');
-  if(r.minor)notes.push('Técnica primero y cargas moderadas, con supervisión recomendada.');
-  if(sportsList().length)notes.push('Semana organizada junto a '+esc(sportsList().map(spName).join(', ').toLowerCase())+': mira el calendario.');
-  if(d.rendimiento&&d.deporte)notes.push(`Bloque específico de ${esc((d.deporteDet||d.deporte).toLowerCase())}${d.fechaPrueba?', periodizado hacia el '+new Date(d.fechaPrueba+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}):''}.`);
-  if(d.sueno==='Menos de 6'||d.estres>=4)notes.push('Volumen inicial algo más bajo por sueño o estrés; se sube si recuperas bien.');
   h+=`<section class="block"><div class="block-h"><h2>Entrenamiento</h2><span style="display:flex;gap:14px"><button class="link" data-act="goto" data-id="exp">Editar</button>${(S.lugares||[]).includes('Gimnasio')?'<button class="link" data-act="goto" data-id="gym">Material del gimnasio</button>':''}${(S.lugares||[]).includes('Parque de barras')?'<button class="link" data-act="goto" data-id="parque">Material del parque</button>':''}</span></div>
    ${aiPanelHTML()}
    <div class="chips sestabs">${[1,2,3,4,5].map(x=>`<button type="button" class="chip sm" data-tweek="${x}" aria-pressed="${x===twk}">${x===5?'Sem. 5 · descarga':'Sem. '+x}</button>`).join('')}</div>
    <div class="week2">${week}</div>
    <div class="wlegend"><span><i class="it str">Fuerza</i></span><span><i class="it spt">Deporte</i></span><span><i class="it car">Cardio</i></span><span>Barra inferior: carga del día</span></div>
    ${trainDayHTML(twk,tdSel)}
-   <details class="volx pinfo"${PINFO?' open':''}><summary>Cómo está montado tu plan<small>Objetivo, esquema, material, ajustes y por qué tu semana está así</small></summary><div class="pinfob">
-   ${OW.why.length?`<h4 class="rhsub">Tu semana</h4><ul class="why">${OW.why.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
-   <dl class="kv"><dt>Objetivo</dt><dd>${esc(d.objetivo||'—')}${d.secundario?' · '+esc(d.secundario.toLowerCase()):''}</dd>
-   <dt>Nivel</dt><dd>${esc(d.nivel||'—')}</dd>
-   <dt>Esquema</dt><dd>${esc(p.reps)}</dd>
-   <dt>Material</dt><dd>${(d.lugares||[]).map(l=>esc(l)+(l==='Gimnasio'?(gymF(d)?` (${inv(l).size} elementos de tus fotos)`:' (plan genérico)'):l==='Parque de barras'?` (${inv(l).size} elementos)`:` (${inv(l).size?inv(l).size+' elementos':'peso corporal'})`)).join('<br>')||'—'}</dd>
-   ${notes.length?`<dt>Ajustes</dt><dd>${notes.join('<br>')}</dd>`:''}</dl>
-   <h4 class="rhsub">Volumen semanal por músculo</h4>${volInner()}</div></details></section>`;
+</section>`;
   const P_tr=h;h='';
 
   // Lesión
