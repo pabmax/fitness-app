@@ -1179,6 +1179,8 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 .ctip p{margin:0;font-size:13.5px;color:#d9d6ef;flex:1;min-width:0}.ctip p b{color:#fff}
 .ctip button{all:unset;cursor:pointer;color:#B3A9FF;font:600 13px var(--f-ui);padding-top:2px}.ctip button:focus-visible{outline:2px solid #B3A9FF}
 @keyframes mflash{0%,100%{box-shadow:0 0 0 0 rgba(123,108,255,0)}30%{box-shadow:0 0 0 3px rgba(123,108,255,.8)}}.meal.mflash{animation:mflash 1.4s}
+.qexit{all:unset;cursor:pointer;margin-left:auto;margin-right:6px;padding:7px 14px;border-radius:99px;background:#1F1F24;color:#fff;font:600 13.5px var(--f-ui)}.qexit:focus-visible{outline:2px solid #7B6CFF;outline-offset:2px}
+.cfx{display:grid;gap:8px;width:100%;max-width:280px}.cfx .btn{width:100%}.cfx .link{justify-self:center;color:#9a9aa3;padding:6px}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -1387,7 +1389,7 @@ const DEMO={modulo:'Entrenamiento + nutrición',edad:34,sexo:'Hombre',pais:'Espa
 const DEF={unidades:'Métrico (kg, cm)',minutos:60};
 const hm=n=>{n=Math.round(+n||0);return n<60?n+' min':Math.floor(n/60)+' h'+(n%60?' '+n%60+' min':'')};
 const depName=d=>sportsList().map(spName).join(' y ');
-let S={...DEF},curId='modulo',backToSummary=false;let curQ=0,QDIR=1,QLAST='',BUILD=0,QRAF=0,QTO=0;const errs=new Set();
+let S={...DEF},curId='modulo',backToSummary=false,EDIT=null;let curQ=0,QDIR=1,QLAST='',BUILD=0,QRAF=0,QTO=0;const errs=new Set();
 const PH={},SWAP={},PHF={},ANA={};let GEN={};
 let SAMPLE=null,IMG=null;
 const DET_OFF=AI_PAUSED?'Marca abajo todo lo que hay disponible. La detección automática por foto llegará más adelante.':'La detección automática no está disponible en esta vista: marca el material que aparece en tus fotos.';
@@ -1702,12 +1704,12 @@ function renderMain(keep){
     const real=sc.f.filter(f=>f.t!=='note'),one=real.length===1?real[0]:null;
     const title=st.id==='prevision'?'':QGT[sc.g]||(one?(fn(one.l)||st.title):st.title);
     const opt=real.length&&real.every(f=>!f.req);
-    h=`<div class="qtop"><button type="button" class="qic" data-act="back" aria-label="Pregunta anterior"${idx===0&&curQ===0?' disabled':''}>←</button><span class="qsec">${esc(st.sec.replace(/^[0-9]+ · /,''))}</span><button type="button" class="qic" data-act="qmenu" aria-label="Más opciones" aria-expanded="${!!QMENU}">⋯</button></div>
+    h=`<div class="qtop"><button type="button" class="qic" data-act="back" aria-label="Pregunta anterior"${idx===0&&curQ===0?' disabled':''}>←</button><span class="qsec">${esc(st.sec.replace(/^[0-9]+ · /,''))}</span>${S.planMade?`<button type="button" class="qexit" data-act="qexit">Salir</button>`:''}<button type="button" class="qic" data-act="qmenu" aria-label="Más opciones" aria-expanded="${!!QMENU}">⋯</button></div>
     ${QMENU?`<div class="qmenu"><button type="button" class="mbtn" data-act="demo">Ver con ejemplo</button><button type="button" class="mbtn" data-act="help">Ayuda</button><button type="button" class="mbtn" data-act="info">Base científica</button>${PROF.list.length>1||idx>0?'<button type="button" class="mbtn" data-act="pickprof">Cambiar de perfil</button>':''}<button type="button" class="mbtn" data-act="reset">Empezar de nuevo</button></div>`:''}
     <div class="qprog" role="progressbar" aria-valuemin="1" aria-valuemax="${qp.tot}" aria-valuenow="${qp.pos}" aria-label="Progreso del cuestionario"><i style="width:${(qp.pos/qp.tot*100).toFixed(1)}%"></i></div>
     <div class="qscr${anim}${one?' qone':''}${one&&one.t==='multi'&&!one.list?' qmulti':''}"><div class="qeb"><span>${st.title.toLowerCase()===String(title).toLowerCase()?'':esc(st.title)}</span>${opt?'<em>Opcional</em>':''}</div>
     ${st.id==='prevision'?previsionHTML():`<h1 class="qh">${esc(title)}</h1>${curQ===0&&st.intro?`<p class="intro">${esc(st.intro)}</p>`:''}<div class="fields">${sc.f.map(fieldHTML).join('')}</div>${sc.g==='ap'?bmiBox():''}`}</div>`;
-    const lastStep=steps[idx+1]&&steps[idx+1].id==='resumen'&&curQ===scr.length-1;
+    const lastStep=(steps[idx+1]&&steps[idx+1].id==='resumen'||(EDIT&&EDIT.id===st.id))&&curQ===scr.length-1;
     const empty=one&&!one.req&&(S[one.k]==null||S[one.k]===''||(Array.isArray(S[one.k])&&!S[one.k].length));
     h+=`<div class="actions"><button class="btn primary" data-act="next">${lastStep?(S.planMade?'Guardar cambios':'Crear mi plan'):empty?'Saltar':'Continuar'}</button></div>`;
     QLAST=key;}
@@ -1746,7 +1748,8 @@ function act(a,el){
     if(!validate(steps[idx],sc.f)){render(true);const first=document.querySelector('.field.bad');if(first)first.scrollIntoView({behavior:'smooth',block:'center'});return}
     QDIR=1;if(curQ<scr.length-1){curQ++;save();render();return}
     curQ=0;
-    if(backToSummary&&(curId==='nut4'||(curId==='nut3'&&!vis().some(x=>x.id==='nut4')))){backToSummary=false;curId='resumen';msg='Plan actualizado'}
+    if(EDIT&&curId===EDIT.id){const r=qCheck();if(r){curId=r.id;curQ=r.q;render();toast('Falta una respuesta obligatoria');return}EDIT=null;curId='resumen';msg='Cambios guardados'}
+    else if(backToSummary&&(curId==='nut4'||(curId==='nut3'&&!vis().some(x=>x.id==='nut4')))){backToSummary=false;curId='resumen';msg='Plan actualizado'}
     else{curId=steps[idx+1].id;if(curId==='resumen'){if(S.planMade)msg='Plan actualizado';else{BUILD=1;S.tab='hoy'}}}
   }
   else if(a==='back'){QDIR=-1;if(curQ>0)curQ--;else if(idx>0){curId=steps[idx-1].id;curQ=screens(steps[idx-1]).length-1}}
@@ -1775,6 +1778,7 @@ function act(a,el){
   else if(a==='pickprof'){PICK=true;render(true);return}
   else if(a==='pickclose'){PICK=false;render(true);return}
   else if(a==='qmenu'){QMENU=!QMENU;render(true);return}
+  else if(a==='qexit'){exitBox();return}
   else if(a==='steps'){STPS=true;render(true);return}
   else if(a==='help'){HELP={q:''};QMENU=false;render(true);return}
   else if(a==='closehelp'){HELP=null;render(true);return}
@@ -1808,7 +1812,7 @@ function act(a,el){
   else if(a==='stoppred'){if(AIP.ctl)AIP.ctl.abort();return}
   else if(a==='export'){exportXlsx();return}
   else if(a==='stopgen'){if(GEN.ctl)GEN.ctl.abort();return}
-  else if(a==='goto'){curId=el.dataset.id;curQ=0;QDIR=1;backToSummary=false}
+  else if(a==='goto'){curId=el.dataset.id;curQ=0;QDIR=1;backToSummary=false;EDIT=S.planMade?{snap:JSON.stringify(S),id:curId}:null}
   else if(a==='copy'){const t=JSON.stringify(S,null,2);
     const done=()=>{el.textContent='Copiado';setTimeout(()=>el.textContent='Copiar JSON',1500)};
     try{navigator.clipboard.writeText(t).then(done,()=>selPre())}catch(e){selPre()}return}
@@ -4124,6 +4128,14 @@ function afterLog(w,si,soft){const d=sesDone(w,si),ak=AK(w,si);REG.cel=REG.cel||
   if(d.n&&d.d===d.n&&!REG.cel[ak]){REG.cel={...REG.cel,[ak]:1};regSave();const ses=cycle()[si],vol=ses.ex.reduce((t,e)=>t+(REG.log[LK(w,si,e.name)]||[]).reduce((a,x)=>a+(x&&x.kg&&x.reps?x.kg*x.reps:0),0),0),sets=ses.ex.reduce((t,e)=>t+(REG.log[LK(w,si,e.name)]||[]).filter(x=>x&&x.reps).length,0),st=streak();
     const nb=newBadge();celebrate(st>1?String(st):'✓',st>1?`¡Sesión completada! Racha de ${st} días`:'¡Sesión completada!',`${esc(ses.name)}: ${sets} series${vol?` y ${fmt(Math.round(vol))} kg levantados en total`:''}.${nb?` Nuevo logro: ${esc(nb[1].toLowerCase())}.`:''}`);return}
   const b=newBadge();if(b){if(soft)setTimeout(()=>toast('Nuevo logro: '+b[1]),1200);else celebrate('★','Logro: '+b[1],b[2]+'.')}}
+/* Salir del cuestionario cuando ya hay un plan: guardar o descartar los cambios */
+function qCheck(){const st=vis().filter(x=>x.id!=='resumen');for(const x of st){const sc=screens(x);for(let i=0;i<sc.length;i++){if(!validate(x,sc[i].f))return {id:x.id,q:i}}}errs.clear();return null}
+function exitBox(){document.querySelectorAll('.cel').forEach(x=>x.remove());const changed=EDIT&&EDIT.snap!==JSON.stringify(S);const o=document.createElement('div');o.className='cel';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Salir del cuestionario');
+  o.innerHTML=`<div class="celb cfm"><h3>¿Salir del cuestionario?</h3><p>${changed?'Has cambiado algunas respuestas. Puedes guardarlas y actualizar tu plan, o salir sin guardar.':'Vuelves a tu plan. Las respuestas que hayas cambiado se guardan.'}</p><div class="cfx"><button type="button" class="btn primary" data-x="save">${changed?'Guardar y salir':'Salir'}</button>${changed?'<button type="button" class="btn" data-x="discard">Salir sin guardar</button>':''}<button type="button" class="link" data-x="stay">Seguir editando</button></div></div>`;
+  document.body.appendChild(o);o.addEventListener('click',e=>{const b=e.target.closest('[data-x]');if(!b)return;o.remove();const x=b.dataset.x;if(x==='stay')return;
+    if(x==='discard'&&EDIT){try{S=JSON.parse(EDIT.snap)}catch(er){}EDIT=null;errs.clear();curId='resumen';curQ=0;save();render();toast('Cambios descartados');return}
+    const r=qCheck();if(r){curId=r.id;curQ=r.q;QDIR=1;render();validate(vis().find(y=>y.id===r.id),screens(vis().find(y=>y.id===r.id))[r.q].f);render(true);toast('Completa esta respuesta para guardar');return}
+    EDIT=null;backToSummary=false;curId='resumen';curQ=0;save();render();toast('Cambios guardados')});o.querySelector('[data-x="save"]').focus()}
 function confirmBox(title,text,okLabel,onOk){document.querySelectorAll('.cel').forEach(x=>x.remove());const o=document.createElement('div');o.className='cel';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',title);
   o.innerHTML=`<div class="celb cfm"><h3>${esc(title)}</h3><p>${esc(text)}</p><div class="cfb"><button type="button" class="btn" data-c="no">Cancelar</button><button type="button" class="btn danger" data-c="ok">${esc(okLabel)}</button></div></div>`;document.body.appendChild(o);
   o.addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;o.remove();if(b.dataset.c==='ok')onOk()});o.querySelector('[data-c="no"]').focus()}
