@@ -1251,6 +1251,7 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 .rhfd{background:#1A1A1E;border-radius:14px;padding:10px 12px;display:grid;gap:2px}.rhfd b{font:600 15px var(--f-mono);color:#fff}.rhfd span{font-size:13.5px;color:#9a9aa3}
 .rhcu{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px;color:#e2e2e8}
 .rehab .rhl{margin-top:8px}
+.pinfo>summary{display:flex;flex-direction:column;gap:2px}.pinfo>summary small{font:400 12.5px var(--f-ui);color:var(--muted)}.pinfob{padding:0 14px 14px;display:grid;gap:10px}.pinfob .kv{margin:0}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -3427,7 +3428,7 @@ function rhFigSheetHTML(){const n=RHFIG,f=FIG.figFor(n),m=f&&MAPK(f),it=rehabLis
    ${it[1]?`<div class="rhfd"><b>${esc(it[1])}</b>${it[2]?`<span>${esc(it[2])}</span>`:''}</div>`:''}
    ${cu.length?`<h4 class="rhsub">Cómo se hace</h4><ol class="rhcu">${cu.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
    <p class="rhnote">Para si el dolor pasa de 3/10 o notas algo raro. Si te trata un fisio, que te corrija la técnica.</p></div></div>`}
-let RHC=null;
+let RHC=null,PINFO=false;
 function rehabPlanHTML(){if(S.lesion!=='Sí')return '';const k=rhIdx(),P=RHPH[k],E=rhExercises(),wk=rhWeek(),last=rhLast(),paused=injPaused();
   const step=RHPH.map((x,i)=>`<li class="${i<k?'done':i===k?'on':''}"><i>${i<k?'✓':i+1}</i><span>${x[2]}</span></li>`).join('');
   const li=a=>a.map(x=>`<li>${rhFigBtn(x[0])}<div class="rhi"><span class="rn">${esc(x[0])}${x[3]?' <i class="fis">Fisio</i>':''}</span><span class="rd">${esc(x[1])}</span><small>${esc(x[2])}</small></div></li>`).join('');
@@ -3585,6 +3586,7 @@ function aiHTML(){const a=S.aiPlan,sel=Math.min(S.aiSel||0,a.sesiones.length-1),
 function aiPanelHTML(){if(!SAMPLE)return '';const ld=GEN.st==='load';
   return `<div class="aipanel"><div><b>${S.aiPlan?'Ejercicios elegidos por la IA':'Optimiza tus ejercicios con IA'}</b><p>${S.aiPlan?esc(S.aiPlan.resumen||'Creados a partir de tu material, tu objetivo y tu lesión.')+' Si cambias algo, vuelve a generarlos.':'Ahora ves el plan del motor de reglas. La IA puede elegir los ejercicios de cada día analizando todo tu material, tu objetivo y tu lesión.'}</p></div>
     <div class="aiactions">${ld?`<button class="btn" data-act="stopgen">Detener</button><span class="aimsg">Diseñando tus sesiones… puede tardar hasta un minuto.</span>`:`<button class="btn primary" style="flex:none" data-act="gen">${S.aiPlan?'Regenerar con IA':'Generar con IA'}</button>${S.aiPlan?'<button class="link small" data-act="aioff">Volver al plan del motor de reglas</button>':''}`}${GEN.st==='err'?`<span class="aimsg err">${esc(GEN.msg)}</span>`:''}</div></div>`;}
+function volInner(){return volHTML(week().vol)}
 function volDetailsHTML(){return `<details class="volx"><summary>Volumen semanal por músculo</summary><div style="padding:0 14px 14px">${volHTML(week().vol)}</div></details>`;}
 function planBlock(p){
   let h='';
@@ -4194,7 +4196,7 @@ function shopCost(L){return L.items.reduce((t,o)=>{const p=PRICE[o.name]??PRICE[
 function chainsFor(prov){const r=PROVS[prov];if(!r)return [];return [...new Set([...CHAIN_NAT,...(CHAIN_REG[r]||[])])].filter(c=>OCUIDX[c]);}
 const eur=x=>x.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 let PCOPEN=false;
-document.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('pcmp'))PCOPEN=e.target.open},true);
+document.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('pcmp'))PCOPEN=e.target.open;if(e.target.classList&&e.target.classList.contains('pinfo')&&!e.target.closest('#rehabsec'))PINFO=e.target.open},true);
 function priceCmpHTML(L){const sel=`<select class="sel" data-k="provincia" aria-label="Tu provincia"><option value="">Elige tu provincia…</option>${Object.keys(PROVS).sort((a,b)=>a.localeCompare(b,'es')).map(p=>`<option${p===S.provincia?' selected':''}>${esc(p)}</option>`).join('')}</select>`;
   const box=(teaser,body)=>`<details class="pcmp"${PCOPEN?' open':''}><summary><span class="pct"><b>¿Dónde sale más barata?</b><small>${teaser}</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="pcbody">${body}</div></details>`;
   if(S.pais&&S.pais!=='España')return box('Solo disponible en España',`<p class="volnote" style="margin:0">De momento la comparativa de supermercados solo está disponible en España.</p>`);
@@ -4624,14 +4626,15 @@ function summary(){
    <div class="chips sestabs">${[1,2,3,4,5].map(x=>`<button type="button" class="chip sm" data-tweek="${x}" aria-pressed="${x===twk}">${x===5?'Sem. 5 · descarga':'Sem. '+x}</button>`).join('')}</div>
    <div class="week2">${week}</div>
    <div class="wlegend"><span><i class="it str">Fuerza</i></span><span><i class="it spt">Deporte</i></span><span><i class="it car">Cardio</i></span><span>Barra inferior: carga del día</span></div>
-   <ul class="why">${OW.why.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
    ${trainDayHTML(twk,tdSel)}
+   <details class="volx pinfo"${PINFO?' open':''}><summary>Cómo está montado tu plan<small>Objetivo, esquema, material, ajustes y por qué tu semana está así</small></summary><div class="pinfob">
+   ${OW.why.length?`<h4 class="rhsub">Tu semana</h4><ul class="why">${OW.why.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
    <dl class="kv"><dt>Objetivo</dt><dd>${esc(d.objetivo||'—')}${d.secundario?' · '+esc(d.secundario.toLowerCase()):''}</dd>
    <dt>Nivel</dt><dd>${esc(d.nivel||'—')}</dd>
    <dt>Esquema</dt><dd>${esc(p.reps)}</dd>
    <dt>Material</dt><dd>${(d.lugares||[]).map(l=>esc(l)+(l==='Gimnasio'?(gymF(d)?` (${inv(l).size} elementos de tus fotos)`:' (plan genérico)'):l==='Parque de barras'?` (${inv(l).size} elementos)`:` (${inv(l).size?inv(l).size+' elementos':'peso corporal'})`)).join('<br>')||'—'}</dd>
    ${notes.length?`<dt>Ajustes</dt><dd>${notes.join('<br>')}</dd>`:''}</dl>
-   ${volDetailsHTML()}</section>`;
+   <h4 class="rhsub">Volumen semanal por músculo</h4>${volInner()}</div></details></section>`;
   const P_tr=h;h='';
 
   // Lesión
@@ -4640,13 +4643,15 @@ function summary(){
     const fase={'Aguda':'Movilidad suave sin dolor e isométricos.','Subaguda':'Isométricos y ejercicios con rango controlado.','Recuperando función':'Fuerza progresiva en todo el rango de movimiento.','Vuelta al deporte':'Potencia, pliometría y gestos del deporte.'}[d.fase]||'—';
     const evita=(d.movimientos||[]).filter(x=>x!=='Ninguno concreto');
     h+=`<section class="block" id="rehabsec"><div class="block-h"><h2>Protocolo de lesión</h2><button class="link" data-act="goto" data-id="lesion">Editar</button></div>
+     ${rehabPlanHTML()}
+     <details class="volx pinfo"><summary>Detalles de la lesión<small>Semáforo, qué se evita en el entreno y pautas del fisio</small></summary><div class="pinfob">
      <dl class="kv"><dt>Zona</dt><dd>${d.zona?esc(zonaTxt(d,1)):'—'}</dd>
      <dt>Fase</dt><dd>${esc(d.fase||'—')}: ${esc(fase)}</dd>
      <dt>Semáforo</dt><dd><span class="sem"><span class="dot" style="background:${col}"></span>${esc(lbl)}</span><br><span style="color:var(--muted);font-size:13px">Dolor al moverte ${v}/10 · al día siguiente ${d.dolor24??'—'}/10</span></dd>
      ${evita.length?`<dt>Se evita</dt><dd>${esc(evita.join(', '))}</dd>`:''}
      <dt>Tu plan</dt><dd>${esc(injPlanTxt())}</dd>
      ${d.fisio==='Sí'?`<dt>Pautas del fisio</dt><dd>${d.fisioSi?'Incluir: '+esc(d.fisioSi)+'<br>':''}${d.fisioNo?'Nunca programar: '+esc(d.fisioNo):''}${!d.fisioSi&&!d.fisioNo?'Sin indicaciones registradas':''}</dd>`:`<dt>Fisio</dt><dd>Recomendamos que un profesional valore la lesión.</dd>`}
-     </dl>${rehabPlanHTML()}</section>`;
+     </dl></div></details></section>`;
   }
 
   h+=respSummary();
