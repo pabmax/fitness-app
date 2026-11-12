@@ -1181,6 +1181,12 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 @keyframes mflash{0%,100%{box-shadow:0 0 0 0 rgba(123,108,255,0)}30%{box-shadow:0 0 0 3px rgba(123,108,255,.8)}}.meal.mflash{animation:mflash 1.4s}
 .qexit{all:unset;cursor:pointer;margin-left:auto;margin-right:6px;padding:7px 14px;border-radius:99px;background:#1F1F24;color:#fff;font:600 13.5px var(--f-ui)}.qexit:focus-visible{outline:2px solid #7B6CFF;outline-offset:2px}
 .cfx{display:grid;gap:8px;width:100%;max-width:280px}.cfx .btn{width:100%}.cfx .link{justify-self:center;color:#9a9aa3;padding:6px}
+.qx svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}.qic.qx{margin-left:auto;margin-right:6px}
+.cel.xtop{place-items:start center;padding-top:calc(64px + env(safe-area-inset-top,0px));background:rgba(8,8,11,.6)}
+.xpan{width:100%;max-width:420px;text-align:left;justify-items:stretch;gap:6px;animation:xdrop .28s cubic-bezier(.2,.8,.2,1)}
+.xpan h3{font-size:20px;margin:0}.xpan p{margin:0 0 6px;font-size:14px}.xpan .cfx{max-width:none}.xpan .cfx .link{justify-self:center}
+@keyframes xdrop{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.xpan{animation:none}}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -1704,7 +1710,7 @@ function renderMain(keep){
     const real=sc.f.filter(f=>f.t!=='note'),one=real.length===1?real[0]:null;
     const title=st.id==='prevision'?'':QGT[sc.g]||(one?(fn(one.l)||st.title):st.title);
     const opt=real.length&&real.every(f=>!f.req);
-    h=`<div class="qtop"><button type="button" class="qic" data-act="back" aria-label="Pregunta anterior"${idx===0&&curQ===0?' disabled':''}>←</button><span class="qsec">${esc(st.sec.replace(/^[0-9]+ · /,''))}</span>${S.planMade?`<button type="button" class="qexit" data-act="qexit">Salir</button>`:''}<button type="button" class="qic" data-act="qmenu" aria-label="Más opciones" aria-expanded="${!!QMENU}">⋯</button></div>
+    h=`<div class="qtop"><button type="button" class="qic" data-act="back" aria-label="Pregunta anterior"${idx===0&&curQ===0?' disabled':''}>←</button><span class="qsec">${esc(st.sec.replace(/^[0-9]+ · /,''))}</span>${S.planMade?`<button type="button" class="qic qx" data-act="qexit" aria-label="Salir del cuestionario"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`:''}<button type="button" class="qic" data-act="qmenu" aria-label="Más opciones" aria-expanded="${!!QMENU}">⋯</button></div>
     ${QMENU?`<div class="qmenu"><button type="button" class="mbtn" data-act="demo">Ver con ejemplo</button><button type="button" class="mbtn" data-act="help">Ayuda</button><button type="button" class="mbtn" data-act="info">Base científica</button>${PROF.list.length>1||idx>0?'<button type="button" class="mbtn" data-act="pickprof">Cambiar de perfil</button>':''}<button type="button" class="mbtn" data-act="reset">Empezar de nuevo</button></div>`:''}
     <div class="qprog" role="progressbar" aria-valuemin="1" aria-valuemax="${qp.tot}" aria-valuenow="${qp.pos}" aria-label="Progreso del cuestionario"><i style="width:${(qp.pos/qp.tot*100).toFixed(1)}%"></i></div>
     <div class="qscr${anim}${one?' qone':''}${one&&one.t==='multi'&&!one.list?' qmulti':''}"><div class="qeb"><span>${st.title.toLowerCase()===String(title).toLowerCase()?'':esc(st.title)}</span>${opt?'<em>Opcional</em>':''}</div>
@@ -4130,9 +4136,9 @@ function afterLog(w,si,soft){const d=sesDone(w,si),ak=AK(w,si);REG.cel=REG.cel||
   const b=newBadge();if(b){if(soft)setTimeout(()=>toast('Nuevo logro: '+b[1]),1200);else celebrate('★','Logro: '+b[1],b[2]+'.')}}
 /* Salir del cuestionario cuando ya hay un plan: guardar o descartar los cambios */
 function qCheck(){const st=vis().filter(x=>x.id!=='resumen');for(const x of st){const sc=screens(x);for(let i=0;i<sc.length;i++){if(!validate(x,sc[i].f))return {id:x.id,q:i}}}errs.clear();return null}
-function exitBox(){document.querySelectorAll('.cel').forEach(x=>x.remove());const changed=EDIT&&EDIT.snap!==JSON.stringify(S);const o=document.createElement('div');o.className='cel';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Salir del cuestionario');
-  o.innerHTML=`<div class="celb cfm"><h3>¿Salir del cuestionario?</h3><p>${changed?'Has cambiado algunas respuestas. Puedes guardarlas y actualizar tu plan, o salir sin guardar.':'Vuelves a tu plan. Las respuestas que hayas cambiado se guardan.'}</p><div class="cfx"><button type="button" class="btn primary" data-x="save">${changed?'Guardar y salir':'Salir'}</button>${changed?'<button type="button" class="btn" data-x="discard">Salir sin guardar</button>':''}<button type="button" class="link" data-x="stay">Seguir editando</button></div></div>`;
-  document.body.appendChild(o);o.addEventListener('click',e=>{const b=e.target.closest('[data-x]');if(!b)return;o.remove();const x=b.dataset.x;if(x==='stay')return;
+function exitBox(){document.querySelectorAll('.cel').forEach(x=>x.remove());const changed=EDIT&&EDIT.snap!==JSON.stringify(S);const o=document.createElement('div');o.className='cel xtop';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Salir del cuestionario');
+  o.innerHTML=`<div class="celb cfm xpan"><h3>¿Salir del cuestionario?</h3><p>${changed?'Has cambiado algunas respuestas. Puedes guardarlas y actualizar tu plan, o salir sin guardar.':'Vuelves a tu plan. Las respuestas que hayas cambiado se guardan.'}</p><div class="cfx"><button type="button" class="btn primary" data-x="save">${changed?'Guardar y salir':'Salir'}</button>${changed?'<button type="button" class="btn" data-x="discard">Salir sin guardar</button>':''}<button type="button" class="link" data-x="stay">Seguir editando</button></div></div>`;
+  document.body.appendChild(o);o.addEventListener('keydown',e=>{if(e.key==='Escape')o.remove()});o.addEventListener('click',e=>{if(e.target===o){o.remove();return}const b=e.target.closest('[data-x]');if(!b)return;o.remove();const x=b.dataset.x;if(x==='stay')return;
     if(x==='discard'&&EDIT){try{S=JSON.parse(EDIT.snap)}catch(er){}EDIT=null;errs.clear();curId='resumen';curQ=0;save();render();toast('Cambios descartados');return}
     const r=qCheck();if(r){curId=r.id;curQ=r.q;QDIR=1;render();validate(vis().find(y=>y.id===r.id),screens(vis().find(y=>y.id===r.id))[r.q].f);render(true);toast('Completa esta respuesta para guardar');return}
     EDIT=null;backToSummary=false;curId='resumen';curQ=0;save();render();toast('Cambios guardados')});o.querySelector('[data-x="save"]').focus()}
