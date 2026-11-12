@@ -41,6 +41,7 @@
 |---|---|
 | 🧭 **Cuestionario inicial** | Una pregunta por pantalla, con tarjetas, ruedas para edad, altura y peso, una silueta para marcar la lesión, una previsión a 10 semanas y la creación del plan en directo. |
 | 🏋️ **Entrenamiento** | Plan semanal que combina fuerza, deportes y cardio. Volumen por músculo, bloques de 5 semanas con descarga, sustitutos de ejercicios y hora de entreno por día. |
+| 🎾 **Deportes** | Rutina para cada deporte (calentamiento, sesión y prevención) con progresión propia: sube de nivel con cada semana completada, se adapta a cómo te fue y evita coincidir con la pierna pesada del gimnasio. La nutrición sube los hidratos en las sesiones clave y explica qué comer antes, durante y después. |
 | 🩹 **Lesiones** | Readaptación progresiva de la zona lesionada, integrada en el plan. |
 | 📈 **Registro y progreso** | Series con peso, repeticiones y RIR, predicción de cargas, gráficas por sesión, ejercicio y bloque. Incluye una simulación de 10 semanas. |
 | 🥗 **Nutrición** | Fases (mantenimiento, volumen, definición, recomposición), macros por día según la carga, macros editables por kg y menú semanal con recetas paso a paso. Las comidas pre y post entreno se adaptan al tiempo que falta para entrenar. |

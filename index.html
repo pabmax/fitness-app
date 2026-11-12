@@ -1210,6 +1210,13 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 .qk.sq{background:linear-gradient(150deg,#3a2408,#7a4a12)}.qk.sq small{color:#ffd59a}.qk.sq p{color:#f5e2c6}
 .qk.sq.done{background:linear-gradient(150deg,#0f2e1d,#1a5a37)}
 .qkok{flex:1;display:grid;place-items:center;height:48px;border-radius:14px;background:rgba(255,255,255,.14);color:#fff;font:700 15px var(--f-ui)}
+
+.sprlv{display:flex;align-items:center;gap:10px;margin-top:10px;font:600 12px var(--f-ui);color:#9a9aa3}.sprlv i{flex:1;height:6px;border-radius:6px;background:#2a2a33;overflow:hidden}.sprlv b{display:block;height:100%;background:linear-gradient(90deg,#F2994A,#FFB347);border-radius:6px}
+.sprwhy{margin-top:10px;background:rgba(91,140,255,.12);border:1px solid rgba(91,140,255,.35);border-radius:12px;padding:9px 11px;font-size:13px;color:#cdd9ff}
+.sprnext{margin:8px 0 0;font-size:13px;color:#9a9aa3}.sprnext b{color:#fff;font-weight:600}
+.spfuel{margin-top:10px;background:rgba(242,153,74,.08);border:1px solid rgba(242,153,74,.3);border-radius:14px;padding:12px}.spfuel b{display:block;font:700 14px var(--f-ui);color:#ffd59a;margin-bottom:6px}
+.spfuel ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}.spfuel li{font-size:13.5px;color:#e2e2e8;display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px}.spfuel li span{color:#9a9aa3;font-weight:600}
+.spfuel p{margin:8px 0 0;font-size:13px;color:#cfcfd6}.spfuel.rec{background:rgba(91,140,255,.1);border-color:rgba(91,140,255,.35)}.spfuel.rec b{color:#cdd9ff}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -1939,8 +1946,8 @@ app.addEventListener('click',e=>{
   const hg=e.target.closest('[data-hguide]');if(hg){HELP.q=HGUIDES.find(x=>x[0]===hg.dataset.hguide)[1];const L=helpLists(hg.dataset.hguide);document.getElementById('hfaq').innerHTML=L.f;document.getElementById('hgds').innerHTML=L.g;const i=document.getElementById('hq');if(i)i.value=HELP.q;return}
   const ck=e.target.closest('[data-ctipok]');if(ck){S.tips={...(S.tips||{}),[ck.dataset.ctipok]:1};save();ck.closest('.ctip').remove();return}
   const sg=e.target.closest('[data-stgoal]');if(sg){S.pasosMeta=Math.max(2000,Math.min(30000,stepGoal()+ +sg.dataset.stgoal));save();render(true);toast('Meta: '+fmt(S.pasosMeta)+' pasos');return}
-  const spd=e.target.closest('[data-spdone]');if(spd){const v=spd.dataset.spdone,ix=v.lastIndexOf('|'),k=v.slice(0,ix),f=v.slice(ix+1);REG.sport={...(REG.sport||{}),[k]:{f,t:Date.now()}};markDay();regSave();render(true);toast('Deporte registrado · '+f.toLowerCase());const b=newBadge();if(b)setTimeout(()=>celebrate('★','Logro: '+b[1],b[2]+'.'),600);return}
-  const spu=e.target.closest('[data-spundo]');if(spu){const r={...(REG.sport||{})};delete r[spu.dataset.spundo];REG.sport=r;regSave();render(true);toast('Registro deshecho');return}
+  const spd=e.target.closest('[data-spdone]');if(spd){const v=spd.dataset.spdone,ix=v.lastIndexOf('|'),k=v.slice(0,ix),f=v.slice(ix+1);const pk=k.split('|'),wl=+pk[1],nm=pk.slice(3).join('|'),so=sportsList().find(y=>spName(y)===nm)||{};const before=(REG.spProg||{})[so.dep||'Otro'];REG.sport={...(REG.sport||{}),[k]:{f,t:Date.now(),pv:before}};spAdvance(so.dep||'Otro',so.int||'Moderada',f,wl);markDay();regSave();render(true);toast('Deporte registrado · '+f.toLowerCase());const b=newBadge();if(b)setTimeout(()=>celebrate('★','Logro: '+b[1],b[2]+'.'),600);return}
+  const spu=e.target.closest('[data-spundo]');if(spu){const r={...(REG.sport||{})},old=r[spu.dataset.spundo],nm=spu.dataset.spundo.split('|').slice(3).join('|'),so=sportsList().find(y=>spName(y)===nm)||{};if(old){const g={...(REG.spProg||{})};if(old.pv==null)delete g[so.dep||'Otro'];else g[so.dep||'Otro']=old.pv;REG.spProg=g}delete r[spu.dataset.spundo];REG.sport=r;regSave();render(true);toast('Registro deshecho');return}
   const qs=e.target.closest('[data-qset]');if(qs){const [w,si]=qs.dataset.qset.split('|').map(Number);quickSet(w,si);return}
   const bdg=e.target.closest('[data-badge]');if(bdg){const b=BADGES.find(x=>x[0]===bdg.dataset.badge),{got}=badgeState();if(b)toast((got[b[0]]?'Conseguido: ':'Pendiente: ')+b[2]);return}
   const bz=e.target.closest('[data-bz]');if(bz){bzPick(bz.dataset.bz);return}
@@ -2485,7 +2492,7 @@ Responde solo con JSON: {"cambios":[{"cambio":"","motivo":"una frase","impacto":
   render(true);}
 /* Semana concreta del ciclo: semanas 1–2 de transición si hace falta, semana 5 de descarga (menos carbohidratos) */
 function nutWeekBase(np,w){const rev=curPhase()==='Salida de dieta (reverse)',tr=rev?null:transition(np),cw=(NPH[curPhase()]||NPH.Mantenimiento).cw,Wt={Bajo:cw[0],Medio:cw[1],Alto:cw[2]};
-  const lv=np.days.map(x=>w===5&&x.l==='Alto'?'Medio':x.l);let avg=np.avg;if(tr&&w<=2)avg=tr.mid;if(w===5&&!rev)avg=Math.round(np.avg*.95);if(rev)avg=phaseKcal(calc(),w).k;
+  const UP={Bajo:'Medio',Medio:'Alto',Alto:'Alto'},lv=np.days.map(x=>w===5&&x.l==='Alto'?'Medio':(w!==5&&spKeyDay(x.i,w)?UP[x.l]:x.l));let avg=np.avg;if(tr&&w<=2)avg=tr.mid;if(w===5&&!rev)avg=Math.round(np.avg*.95);if(rev)avg=phaseKcal(calc(),w).k;
   const Cw=Math.max(0,7*(avg-np.P*4-np.F*9)/4),sw=lv.reduce((t,l)=>t+Wt[l],0);
   return lv.map((l,i)=>{const c=Math.round(Cw*Wt[l]/sw);return {i,l,p:np.P,f:np.F,c,k:Math.round(np.P*4+np.F*9+c*4)}});}
 function nutWeek(np,w){const base=nutWeekBase(np,w),r=calc();
@@ -2506,7 +2513,7 @@ function nutDayHTML(np,wd,w){const W=optimizeWeek(),D=W.day[wd.i],car=W.cardio.i
     <div class="ndstats"><div><small>Calorías</small><b>${fmt(wd.k)}</b></div><div><small>Proteína</small><b>${wd.p} g</b></div><div><small>Carbohidratos</small><b>${wd.c} g</b></div><div><small>Grasas</small><b>${wd.f} g</b></div></div>
     ${MS.T.gap?`<div class="ntime">${timeEditHTML(w,wd.i)}${MS.T.pre>=0||MS.T.post>=0?`<span class="tmeals">${MS.T.pre>=0?`${esc(rows[MS.T.pre].n)} antes`:''}${MS.T.pre>=0&&MS.T.post>=0?' · ':''}${MS.T.post>=0?`${esc(rows[MS.T.post].n.toLowerCase())} después`:''}</span>`:''}</div>`:''}
     ${macroDonut(wd,DSEM[wd.i].toLowerCase())}
-    ${wd.sick?sickDayHTML('nut',w,wd.i,`Déficit en pausa: hoy comes a mantenimiento (${fmt(wd.k)} kcal) con la misma proteína${wd.sick.type==='Digestivo'?' y menos grasa para que asiente mejor':''}.`):`<p class="ntip">${esc(LVTIP[wd.l])}</p>`}
+    ${wd.sick?sickDayHTML('nut',w,wd.i,`Déficit en pausa: hoy comes a mantenimiento (${fmt(wd.k)} kcal) con la misma proteína${wd.sick.type==='Digestivo'?' y menos grasa para que asiente mejor':''}.`):`<p class="ntip">${esc(LVTIP[wd.l])}</p>${spFuelHTML(w,wd.i,wd)}`}
     ${wd.sick?'':sickDayHTML('nut',w,wd.i)}${menuDayHTML(rows,wd,w)}</div>`;}
 
 /* ---------- Menú semanal ----------
@@ -2778,24 +2785,83 @@ const SPLAN={
   w:[['Sesión normal','Haz tu actividad con normalidad.'],['Técnica','Dedica parte de la sesión a mejorar la técnica.'],['Intensidad','Incluye algunos tramos más intensos.'],['Volumen','Semana de más carga: algo más de duración.'],['Descarga','Sesión más corta y suave.']],
   cd:[['Movilidad y estiramientos suaves','5–10 min']]}};
 const spKey=(w,i,n)=>`c${REG.cur||1}|${w}|${i}|${n}`;
+
+/* ---------- Progresión de cada deporte ----------
+   Nivel (0–20) por deporte: arranca según tu intensidad y nivel y sube un nivel por cada semana de sesiones hechas
+   («Fácil» sube 1,5, «Duro» lo mantiene), unos 5 meses de la base al máximo y la semana 5 del bloque es de descarga.
+   Cada deporte alterna tipos de sesión a lo largo de la semana (calidad / volumen / técnica).
+   Interferencias: si el día anterior o siguiente hay pierna pesada, la sesión de calidad pasa a suave;
+   si el deporte de ayer fue «Duro», hoy la fuerza baja una repetición en reserva (RIR +1). */
+const SPSTEP=20;
+const r5=x=>Math.max(5,Math.round(x/5)*5),r50=x=>Math.max(50,Math.round(x/50)*50),fx=(a,b,P)=>a+(b-a)*Math.min(1,P/SPSTEP);
+function spBase(dep,int){return ({Suave:1,Moderada:4,Intensa:7}[int]||4)+({Principiante:-1,Intermedio:0,Avanzado:2}[S.nivel]||0)}
+function spLevel(dep,int){const g=(REG.spProg||{})[dep];return Math.max(0,Math.min(SPSTEP,(g==null?spBase(dep,int):g)))}
+function spSlot(W,i,name){let k=0;for(let d=0;d<i;d++)if(W.day[d].sp.some(x=>x.name===name))k++;return k}
+const SPGEN={
+ 'Running':(P,v,sl,easy,w)=>{const e=r5(fx(25,50,P)*v),L=r5(fx(35,90,P)*v),n=Math.round(fx(4,10,P)*v),it=Math.round(fx(45,120,P)/15)*15,tm=r5(fx(10,30,P)*v);
+   const S1=[`Rodaje suave · ${e} min`,`${e} min en zona 2: puedes hablar en frases completas. Al final, 4 rectas de 80 m.`,e+10],
+    Q1=[`Series · ${n} × ${it} s`,`10 min suave + ${n} × ${it} s rápido (recupera trotando el mismo tiempo) + 10 min suave.`,Math.round(20+n*it*2/60)],
+    Q2=[`Ritmo · ${tm} min`,`10 min suave + ${tm} min a ritmo de 10 km (exigente pero sostenible) + 10 min suave.`,tm+20],
+    LG=[`Tirada larga · ${L} min`,`${L} min suaves y constantes. Si pasas de 75 min, lleva agua e hidratos.`,L];
+   if(easy)return S1;return [w%2?Q1:Q2,S1,LG,S1][sl%4]},
+ 'Ciclismo':(P,v,sl,easy)=>{const e=r5(fx(45,120,P)*v),n=Math.round(fx(2,4,P)),t=Math.round(fx(6,15,P)*v),L=r5(fx(75,210,P)*v);
+   return easy||sl%3===0?[`Fondo · ${e} min`,`${e} min en zona 2, cadencia 85–95 rpm.`,e]:sl%3===1?[`Umbral · ${n} × ${t} min`,`15 min suave + ${n} × ${t} min fuerte pero sostenible (4 min suave entre medias) + 10 min suave.`,25+n*(t+4)]:[`Salida larga · ${Math.floor(L/60)} h ${L%60?L%60+' min':''}`.trim(),`${L} min suaves. Come 30–60 g de hidratos por hora a partir de la primera hora.`,L]},
+ 'Natación':(P,v,sl,easy)=>{const tot=r50(fx(800,3000,P)*v),n=Math.round(fx(4,10,P)*v),d=P<8?50:100;
+   return easy||sl%2===0?[`Aeróbico · ${tot} m`,`200 m calentamiento + ${n} × ${d*2} m cómodo (20 s) + técnica hasta completar ${tot} m.`,Math.round(tot/40)]:[`Series · ${n*2} × ${d} m`,`300 m calentamiento + ${n*2} × ${d} m a ritmo fuerte (20–30 s) + 200 m suave. Total ≈ ${r50(500+n*2*d)} m.`,Math.round((500+n*2*d)/35)]},
+ 'Pádel / tenis':(P,v,sl,easy)=>{const tech=[['Volea','golpes cortos y firmes delante del cuerpo'],['Bandeja / remate','golpea por delante, con el brazo extendido'],['Revés','gira los hombros antes de golpear'],['Saque y resto','profundidad antes que potencia'],['Globo','alto y profundo para ganar la red']][Math.floor(P/2)%5],m=r5(fx(10,25,P)*v);
+   return easy?[`Peloteo y técnica`,`Técnica suave de ${tech[0].toLowerCase()} (${tech[1]}) y peloteo, sin partido competitivo.`,45]:sl%2===0?[`Técnica + partido`,`${m} min de ${tech[0].toLowerCase()}: ${tech[1]}. Después, partido.`,75]:[`Partido con objetivo`,`Juega tu partido buscando aplicar la ${tech[0].toLowerCase()} trabajada en la última sesión.`,75]},
+ 'Fútbol':(P,v,sl,easy)=>{const n=Math.round(fx(4,10,P)*v),g=Math.round(fx(3,5,P)*v);return easy?['Técnica y rondos','45 min de técnica con balón y rondos, sin sprints máximos.',45]:sl%2===0?[`Velocidad · ${n} × 30 m`,`Tras calentar: ${n} × 30 m de sprint volviendo andando. Después, entrenamiento o partido.`,75]:[`Juego reducido · ${g} × 6 min`,`Partido o entrenamiento. Por tu cuenta: ${g} × 6 min de juego reducido con 2 min de descanso.`,75]},
+ 'Baloncesto':(P,v,sl,easy)=>{const n=Math.round(fx(4,8,P)*v),t=r5(fx(50,150,P)*v);return easy?['Tiro y técnica','45 min de tiro y bote, sin saltos máximos.',45]:sl%2===0?[`Tiro · ${t} lanzamientos`,`${t} tiros repartidos en 5 posiciones y después partido o entrenamiento.`,75]:[`Aterrizajes y partido`,`${n} × 6 caídas controladas desde un banco y partido o entrenamiento.`,75]},
+ 'Artes marciales':(P,v,sl,easy)=>{const r=Math.round(fx(3,8,P)*v),t=P<10?2:3;return easy?['Técnica suave','Técnica y movilidad, sin combate.',45]:sl%2===0?[`Técnica · ${r} bloques`,`${r} bloques de 3 min de la misma técnica, buscando precisión.`,60]:[`Combate · ${r} × ${t} min`,`${r} asaltos de ${t} min al 70–80 % con 1 min de descanso.`,60]},
+ 'Escalada':(P,v,sl,easy)=>{const g=Math.round(fx(3,7,P)*v),n=Math.round(fx(10,25,P)*v);return easy?['Escalada fácil',`${n} vías o bloques fáciles, disfrutando del movimiento.`,60]:[[`Volumen · ${n} vías`,`${n} vías o bloques 2 grados por debajo de tu máximo.`,75],[`Proyecto · ${g} intentos`,`${g} intentos a un bloque difícil, 3 min de descanso entre intentos.`,60],[`Resistencia · 4 × 4`,`Cuatro bloques seguidos, ${Math.round(fx(3,5,P))} veces, con 4 min de descanso.`,60]][sl%3]},
+ 'Hyrox / CrossFit':(P,v,sl,easy)=>{const r=Math.round(fx(3,6,P)*v),m=r5(fx(12,30,P)*v);return easy?['Técnica ligera','Técnica de estaciones y 20 min de cardio suave.',45]:[[`EMOM · ${m} min`,`EMOM de ${m} min a ritmo cómodo alternando remo, wall balls y burpees.`,50],[`Intervalos · ${r} rondas`,`${r} × (500 m remo + 20 wall balls), 2 min de descanso.`,55],[`Simulación · ${Math.round(fx(2,8,P))} estaciones`,`${Math.round(fx(2,8,P))} estaciones a ritmo de competición con 1 km de carrera entre medias.`,60]][sl%3]},
+ 'Yoga / pilates':(P,v,sl,easy)=>{const m=r5(fx(30,60,P)*v),f=['cadera','columna','hombros','core','equilibrio'][(Math.floor(P/2)+sl)%5];return [`Sesión de ${f} · ${m} min`,`Sesión centrada en ${f}${P>=10?', con posturas más exigentes':''}.`,m]},
+ 'Senderismo':(P,v,sl,easy)=>{const h=Math.round(fx(1,4,P)*v*2)/2,dn=r50(fx(200,1000,P)*v);return [`Ruta · ${String(h).replace('.',',')} h`,`${String(h).replace('.',',')} h con unos ${dn} m de desnivel positivo. Bastones en las bajadas.`,h*60]},
+ 'Otro':(P,v,sl,easy)=>{const m=r5(fx(30,75,P)*v);return easy?['Sesión suave',`${Math.round(m*.6)} min a intensidad baja.`,Math.round(m*.6)]:[`Sesión · ${m} min`,`${m} min de tu actividad${sl%2?' con algunos tramos más intensos':''}.`,m]}};
+function spContext(W,i){const prev=W.day[(i+6)%7],next=W.day[(i+1)%7],L=x=>x&&(REG_STR[x]||[0,0])[0]>=2;return {legsPrev:L(prev.str),legsNext:L(next.str)}}
+function sportPlanFor(x,w,i,W,Pov){W=W||optimizeWeek();const o=sportsList().find(y=>spName(y)===x.name)||{},dep=o.dep||'Otro',int=x.int||o.int||'Moderada',P=Pov==null?spLevel(dep,int):Pov,sl=spSlot(W,i,x.name);
+  const v=w===5?.6:[.9,1,1.08,1.15][w-1]||1,ctx=spContext(W,i),legsSp=(SPROF[dep]||SPROF.Otro).legs>=2;let why='';
+  let easy=w===5||int==='Suave';if(!easy&&legsSp&&(ctx.legsPrev||ctx.legsNext)){easy=true;why=ctx.legsPrev?'Ayer hubo pierna en el gimnasio: hoy la sesión es suave para no acumular fatiga.':'Mañana toca pierna: hoy la sesión es suave para llegar fresco.'}
+  const nW=W.day.filter(d=>d.sp.some(y=>y.name===x.name)).length,rot=nW<=1?w-1:sl;
+  const g=(SPGEN[dep]||SPGEN.Otro)(P,v,rot,easy,w);
+  let next='';if(Pov==null){let nw=w,nj=-1;for(let j=i+1;j<7;j++)if(W.day[j].sp.some(y=>y.name===x.name)){nj=j;break}
+    if(nj<0){nw=w>=5?1:w+1;nj=W.day.findIndex(d=>d.sp.some(y=>y.name===x.name))}
+    if(nj>=0)next=sportPlanFor(x,nw,nj,W,Math.min(SPSTEP,P+(w===5?0:1/Math.max(1,nW)))).title}
+  return {dep,int,P,sl,title:g[0],desc:g[1],min:g[2],why,easy,next}}
+function spAdvance(dep,int,f,w){const g={...(REG.spProg||{})},cur=g[dep]==null?spBase(dep,int):g[dep],nW=Math.max(1,optimizeWeek().day.filter(d=>d.sp.some(y=>((sportsList().find(z=>spName(z)===y.name)||{}).dep||'Otro')===dep)).length);
+  if(w!==5)g[dep]=Math.max(0,Math.min(SPSTEP,Math.round((cur+({Fácil:1.5,Normal:1,Duro:0}[f]??1)/nW)*100)/100));REG.spProg=g}
+/* Sesión clave de deporte (calidad o larga): ese día sube la carga y, con ella, los carbohidratos */
+function spKeyDay(i,w){try{const W=optimizeWeek();return W.day[i].sp.some(x=>{const G=sportPlanFor(x,w,i,W);return !G.easy&&(G.min>=75||/^(Series|Ritmo|Umbral|Intervalos|Simulación|Tirada|Salida|Combate|Proyecto|Velocidad)/.test(G.title))})}catch(e){return false}}
+function spFuelHTML(w,i,wd){const W=optimizeWeek(),D=W.day[i];if(!D.sp.length&&!hardYesterday(w,i))return '';const r=calc(),kg=r.kg||70;let h='';
+  D.sp.forEach(x=>{const G=sportPlanFor(x,w,i,W),long=G.min>=75;
+    h+=`<div class="spfuel"><b>${esc(x.name)} hoy · ${esc(G.title)}</b><ul>
+      <li><span>Antes (1–3 h)</span>Comida con hidratos fáciles de digerir y poca grasa y fibra.</li>
+      ${long?`<li><span>Durante</span>${G.min>=120?'60–90':'30–60'} g de hidratos por hora a partir de los 60 min (fruta, dátiles o bebida isotónica) y agua con sales.</li>`:`<li><span>Durante</span>Agua según sed; con calor, añade sales.</li>`}
+      <li><span>Después</span>${Math.round(kg*.3)} g de proteína y ${Math.round(kg*(spKeyDay(i,w)?1:.6))} g de hidratos en las 2 h siguientes.</li></ul>${spKeyDay(i,w)?'<p>Es una sesión clave: hoy el plan sube los hidratos del día para que rindas y recuperes.</p>':''}</div>`});
+  if(hardYesterday(w,i))h+=`<div class="spfuel rec"><b>Ayer fue un día duro</b><p>Hoy prioriza recuperar: proteína en cada comida, hidratos para reponer energía y 7–9 h de sueño.</p></div>`;
+  return h}
+function hardYesterday(w,i){const p=(i+6)%7,W=optimizeWeek();return W.day[p].sp.some(x=>{const l=(REG.sport||{})[spKey(w,p,x.name)];return l&&l.f==='Duro'})}
 function sportSession(x,w){const o=sportsList().find(y=>spName(y)===x.name)||{},dep=o.dep||'Otro',P=SPLAN[dep]||SPLAN.Otro,int=(x.int||o.int||'Moderada');
   let k=Math.min(5,Math.max(1,w))-1;if(int==='Suave'&&k>=1&&k<=3&&['Running','Ciclismo','Natación','Hyrox / CrossFit'].includes(dep))k=0;
   return {dep,P,int,s:P.w[k]}}
-function sportCardHTML(x,w,i){const {dep,P,int,s}=sportSession(x,w),key=spKey(w,i,x.name),log=(REG.sport||{})[key];
+function sportCardHTML(x,w,i){const {dep,P,int}=sportSession(x,w),G=sportPlanFor(x,w,i),s=[G.title,G.desc],key=spKey(w,i,x.name),log=(REG.sport||{})[key];
   const li=a=>a.map(([t,d])=>`<li><span>${esc(t)}</span>${d&&d!=='—'?`<b>${esc(d)}</b>`:''}</li>`).join('');
-  return `<div class="spr${log?' done':''}"><div class="sprh"><div><small>Deporte · semana ${w}${w===5?' · descarga':''}</small><h4>${esc(x.name)}</h4></div><span class="sprt">${esc(P.min)} · ${esc(int.toLowerCase())}</span></div>
+  return `<div class="spr${log?' done':''}"><div class="sprh"><div><small>Deporte · semana ${w}${w===5?' · descarga':''}</small><h4>${esc(x.name)}</h4></div><span class="sprt">≈ ${hm(Math.round(G.min/5)*5+15)} · ${esc(int.toLowerCase())}</span></div>
+   <div class="sprlv"><span>Nivel ${Math.floor(G.P)+1} de ${SPSTEP+1}</span><i><b style="width:${Math.round((G.P+1)/(SPSTEP+1)*100)}%"></b></i></div>
+   ${G.why?`<div class="sprwhy">${esc(G.why)}</div>`:''}
    <div class="sprb"><div class="sprs"><i>1</i><div><b>Calentamiento</b><ul>${li(P.wu)}</ul></div></div>
    <div class="sprs main"><i>2</i><div><b>${esc(s[0])}</b><p>${esc(s[1])}</p></div></div>
    <div class="sprs"><i>3</i><div><b>Vuelta a la calma y prevención</b><ul>${li(P.cd)}</ul></div></div></div>
    <p class="sprtip">${esc(SPTIP[dep]||SPTIP.Otro)}</p>
+   ${G.next?`<p class="sprnext">Próxima sesión de ${esc(x.name)}: <b>${esc(G.next)}</b></p>`:''}
    ${log?`<div class="sprlog"><span>✓ Hecho${log.f?' · '+esc(log.f.toLowerCase()):''}</span><button type="button" class="link small" data-spundo="${esc(key)}">Deshacer</button></div>`
      :`<div class="sprq"><span>¿Hecho? ¿Qué tal fue?</span><div class="chips">${['Fácil','Normal','Duro'].map(f=>`<button type="button" class="chip sm" data-spdone="${esc(key)}|${f}">${f}</button>`).join('')}</div></div>`}</div>`}
-function sportQuickHTML(w,i,D){if(!D.sp.length)return '';const x=D.sp[0],{s,P}=sportSession(x,w),key=spKey(w,i,x.name),log=(REG.sport||{})[key];
+function sportQuickHTML(w,i,D){if(!D.sp.length)return '';const x=D.sp[0],G=sportPlanFor(x,w,i),s=[G.title,G.desc],key=spKey(w,i,x.name),log=(REG.sport||{})[key];
   return `<div class="qk sq${log?' done':''}"><small>Hoy · ${esc(D.sp.map(y=>y.name).join(' + '))}</small><h3>${esc(s[0])}</h3><p>${esc(s[1])}</p>
    <div class="qkr">${log?`<span class="qkok">✓ Hecho${log.f?' · '+esc(log.f.toLowerCase()):''}</span>`:`<button type="button" class="qkb" data-spdone="${esc(key)}|Normal">Hecho</button>`}<button type="button" class="qkb ghost${log?'':' sm'}" data-tab="entreno" data-d="${i}">Ver rutina</button></div></div>`}
 const SPTIP={'Running':'Calienta 10 min suave y termina con movilidad de cadera y gemelo.','Ciclismo':'Lleva hidratos y agua si dura más de una hora.','Fútbol':'Calentamiento con carrera suave, movilidad y cambios de ritmo; tras el partido, hidrátate y come proteína con hidratos.','Pádel / tenis':'Calienta hombro y muñeca con banda antes de jugar.','Baloncesto':'Calienta tobillos y rodillas; los saltos cargan mucho: si hay pierna al día siguiente, ve con calma.','Natación':'Cuenta como cardio; alterna estilos para no sobrecargar el hombro.','Artes marciales':'Prioriza la técnica si llegas con fatiga del entrenamiento de fuerza.','Escalada':'Carga mucho dedos y antebrazos: evita tirones pesados el mismo día.','Hyrox / CrossFit':'Es un día duro: no lo juntes con pierna pesada y cuida la técnica con fatiga.','Yoga / pilates':'Perfecto para recuperar: suma movilidad sin fatiga.','Senderismo':'Cuenta como actividad aeróbica suave.','Otro':'Calienta bien y ajusta el esfuerzo si llegas con fatiga.'};
 function trainDayHTML(w,i){
-  const W=optimizeWeek(),D=W.day[i],p=plan(),si=p.pattern.indexOf(i),car=W.cardio.includes(i),lvl=dayLevel(i),RT=si>=0?retSes(w,si):0,rir=Math.min(5,RIRW()[w-1]+(RT?2:0)),SKD=sickAt(w,i);
+  const W=optimizeWeek(),D=W.day[i],p=plan(),si=p.pattern.indexOf(i),car=W.cardio.includes(i),lvl=dayLevel(i),RT=si>=0?retSes(w,si):0,HY=si>=0&&hardYesterday(w,i),rir=Math.min(5,RIRW()[w-1]+(RT?2:0)+(HY&&!RT?1:0)),SKD=sickAt(w,i);
   const it=[];if(D.str)it.push('Fuerza: '+D.str);D.sp.forEach(x=>it.push(x.name));if(car)it.push('Cardio');
   let body='';
   if(si>=0&&S.lesion==='Sí')body+=rehabMini(si);
@@ -2812,6 +2878,7 @@ function trainDayHTML(w,i){
   if(!it.length)body+=`<div class="tdrest"><b>Descanso</b><p>Recuperar también es entrenar: camina 20–30 minutos, haz 10 minutos de movilidad suave y procura dormir 7–9 horas.${respParts().includes('Músculos inspiratorios')?' Mantén tus 2 series de entrenamiento inspiratorio.':''}</p></div>`;
   if(SKD)return `<div class="ndet tdet"><div class="ndh"><div><b>${DSEM[i]} · semana ${w}</b><span>${it.length?esc(it.join(' + '))+' · en pausa':'Descanso'}</span></div><span class="nlv big sk">${THERMO}${ENF()}</span></div>
     ${sickDayHTML('train',w,i)}${it.length?`<details class="volx"><summary>Lo que tocaba hoy (en pausa)</summary><div style="padding:0 12px 10px">${body}</div></details>`:''}</div>`;
+  if(HY&&!RT&&si>=0)body=`<div class="sprwhy" style="margin-top:12px">Ayer el deporte fue duro: hoy entrena con 1 repetición más en reserva (RIR ${rir}) para recuperar sin perder el estímulo.</div>`+body;
   if(RT)body=`<div class="retb">${THERMO}<div><b>Sesión de vuelta tras enfermedad (${RT} de 2)</b><span>Menos series (−40 %) y RIR +2. Si te notas bien, la siguiente vuelve a lo normal.</span></div></div>`+body;
   const ndh0=`<div class="ndh"><div><b>${DSEM[i]} · semana ${w}</b><span>${it.length?esc(it.join(' + ')):'Descanso'}${w===5?' · semana de descarga':''}</span></div><span class="nlv big lv-${lvl}">Carga ${cargaF(lvl)}</span></div>`;
   const fx=si>=0?(cycle()[si]||{ex:[]}).ex[0]:null;
