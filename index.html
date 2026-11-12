@@ -1252,6 +1252,29 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 .rhcu{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px;color:#e2e2e8}
 .rehab .rhl{margin-top:8px}
 .pinfo>summary{display:flex;flex-direction:column;gap:2px}.pinfo>summary small{font:400 12.5px var(--f-ui);color:var(--muted)}.pinfob{padding:0 14px 14px;display:grid;gap:10px}.pinfob .kv{margin:0}
+
+/* ---------- Protocolo de lesión plegable ---------- */
+.injsec{margin:16px 0}
+.injx{border-radius:22px;background:#2A1416;border:2px solid #6B2A2E;overflow:hidden}
+.injs{list-style:none;cursor:pointer;padding:14px;display:grid;grid-template-columns:48px minmax(0,1fr) 30px;gap:12px;align-items:center}
+.injs::-webkit-details-marker{display:none}.injs:focus-visible{outline:3px solid #fff;outline-offset:-3px;border-radius:20px}
+.injic{width:48px;height:48px;border-radius:14px;background:#FF5A5F;display:grid;place-items:center}.injic svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.injt small{display:block;font:700 12px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:#ff9a9d}
+.injt b{display:block;font:800 21px/1.15 var(--f-q);color:#fff;margin-top:2px}
+.injtags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.injtag{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:4px 10px;font:600 13px var(--f-ui);background:rgba(255,255,255,.09);color:#f2f2f5}
+.injd{width:10px;height:10px;border-radius:50%;display:inline-block}.injd.g{background:#2BD46A}.injd.a{background:#F2994A}.injd.r{background:#FF5A5F}
+.injchev{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;transition:transform .25s}
+.injchev svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.injx[open]>.injs .injchev{transform:rotate(180deg)}
+.injtoday{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;background:rgba(0,0,0,.28);border-radius:14px;padding:10px 12px;font-size:14.5px;color:#f2f2f5}
+.injtoday b{font-weight:700;color:#fff}.injtoday em{font-style:normal;font:700 13.5px var(--f-ui);color:#ffcfd0;white-space:nowrap}
+.injb{padding:0 14px 14px;display:grid;gap:12px}
+.rhp.cmp{margin-top:0;background:transparent;padding:0}
+.injx .rhgoal{background:rgba(0,0,0,.25);border-color:transparent}
+.injx .rhchk{background:rgba(0,0,0,.28)}
+.injx details.injdet{margin-top:0;background:rgba(0,0,0,.25);border-radius:14px}
+@media (prefers-reduced-motion:reduce){.injchev{transition:none}}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -1871,7 +1894,7 @@ function act(a,el){
   else if(a==='profsave'){document.querySelectorAll('[data-pren]').forEach(i=>{const x=PROF.list.find(y=>y.id===i.dataset.pren);if(x&&i.value.trim())x.name=i.value.trim()});profSave();PICK=true;render(true);toast('Nombres guardados');return}
   else if(a==='profnew'){PICK='new';render(true);const i=document.getElementById('pname');if(i)i.focus();return}
   else if(a==='profadd'){const i=document.getElementById('pname'),n=(i&&i.value||'').trim();if(!n){if(i)i.focus();return}if(PROF.list.length===1&&PROF.list[0].name==='Tú'&&false){}const id='p'+Date.now().toString(36);PROF.list.push({id,name:n});profSave();switchProfile(id);return}
-  else if(a==='torehab'){const el2=document.getElementById('rehabsec');if(el2)el2.scrollIntoView({behavior:'smooth',block:'start'});return}
+  else if(a==='torehab'){INJOPEN=true;const dx=document.querySelector('#rehabsec .injx');if(dx)dx.open=true;const el2=document.getElementById('rehabsec');if(el2)el2.scrollIntoView({behavior:'smooth',block:'start'});return}
   else if(a==='sickok'){if(!SKS.days.size){const er=document.getElementById('skerr');if(er)er.textContent='Elige al menos un día.';return}const sk={...(REG.sick||{})},ep=SKS.ep||Date.now();
     if(SKS.ep)Object.entries(sk).forEach(([k,v])=>{const m=k.match(/^c(\d+)\|(\d)\|(\d)$/);if(m&&+m[1]===curC()&&+m[2]===SKS.w&&v.ep===SKS.ep)delete sk[k]});
     [...SKS.days].forEach(i=>sk[SK(SKS.w,i)]={type:SKS.type,lvl:SKS.lvl,ep});REG.sick=sk;regSave();S.trW=S.nutW=SKS.w;S.trD=S.nutD=SKS.d;const ds=[...SKS.days].sort().map(i=>DSEM[i].toLowerCase());SKS=null;save();render(true);
@@ -3428,14 +3451,22 @@ function rhFigSheetHTML(){const n=RHFIG,f=FIG.figFor(n),m=f&&MAPK(f),it=rehabLis
    ${it[1]?`<div class="rhfd"><b>${esc(it[1])}</b>${it[2]?`<span>${esc(it[2])}</span>`:''}</div>`:''}
    ${cu.length?`<h4 class="rhsub">Cómo se hace</h4><ol class="rhcu">${cu.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:''}
    <p class="rhnote">Para si el dolor pasa de 3/10 o notas algo raro. Si te trata un fisio, que te corrija la técnica.</p></div></div>`}
-let RHC=null,PINFO=false;
-function rehabPlanHTML(){if(S.lesion!=='Sí')return '';const k=rhIdx(),P=RHPH[k],E=rhExercises(),wk=rhWeek(),last=rhLast(),paused=injPaused();
+let RHC=null,PINFO=false,INJOPEN=false;
+const INJICON='<svg viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(-45 12 12)"><rect x="1.5" y="7.5" width="21" height="9" rx="4.5"/><rect x="8.5" y="7.5" width="7" height="9"/><path d="M10.6 10.4h.01M13.4 10.4h.01M10.6 13.6h.01M13.4 13.6h.01"/></g></svg>';
+function injSem(){if(injPaused())return ['r','En pausa: consulta a un profesional'];const v=S.dolorMov??0;return v<=3?['g','Verde: puedes progresar']:v<=5?['a','Ámbar: mantén la carga']:['r','Rojo: baja un paso']}
+function injSummaryHTML(){const k=rhIdx(),P=RHPH[k],sm=injSem(),tdS=Math.min(6,Math.max(0,S.trD??0)),si=plan().pattern.indexOf(tdS),n=injPaused()?0:(si>=0?rehabForSession(si).length:rhExercises().fis.length+rhExercises().app.length),wk=rhWeek();
+  return `<summary class="injs" aria-label="Protocolo de lesión: ${esc(zonaTxt(S))}, fase ${k+1} de 4, ${esc(sm[1])}. Toca para ${INJOPEN?'cerrar':'ver el plan'}">
+   <span class="injic">${INJICON}</span><span class="injt"><small>Protocolo de lesión</small><b>${esc(zonaTxt(S,1))}</b>
+   <span class="injtags"><span class="injtag">Fase ${k+1} de 4 · ${esc(P[2])}</span><span class="injtag"><i class="injd ${sm[0]}"></i>${esc(sm[1])}</span></span></span>
+   <span class="injchev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span>
+   <span class="injtoday">${injPaused()?'<span>Plan en pausa hasta que te valore un profesional</span>':`<span><b>${si>=0?'Hoy, antes de entrenar':'Hoy, día de descanso'}:</b> ${n} ejercicio${n===1?'':'s'}</span><em>≈ ${Math.max(5,n*3+1)} min</em>`}</span></summary>`}
+function rehabPlanHTML(compact){if(S.lesion!=='Sí')return '';const k=rhIdx(),P=RHPH[k],E=rhExercises(),wk=rhWeek(),last=rhLast(),paused=injPaused();
   const step=RHPH.map((x,i)=>`<li class="${i<k?'done':i===k?'on':''}"><i>${i<k?'✓':i+1}</i><span>${x[2]}</span></li>`).join('');
   const li=a=>a.map(x=>`<li>${rhFigBtn(x[0])}<div class="rhi"><span class="rn">${esc(x[0])}${x[3]?' <i class="fis">Fisio</i>':''}</span><span class="rd">${esc(x[1])}</span><small>${esc(x[2])}</small></div></li>`).join('');
   if(paused)return `<div class="rhp"><div class="rhh"><b>Plan de readaptación · ${esc(zonaTxt(S,1))}</b></div><p class="rhpause">Has marcado señales de alarma: el plan queda en pausa hasta que te valore un profesional. Cuando te den el visto bueno, edita la lesión y quita esas señales.</p></div>`;
   const C=RHC||{d:null,m:null,t:false},nextTest=k<3?(k===2?RHTEST[S.zona]||RHTEST.Otra:k===0?'Dolor en reposo de 2/10 o menos y moverte con 3/10 o menos durante 3 días seguidos':'Dos semanas seguidas con dolor de 3/10 o menos durante los ejercicios y sin empeorar a la mañana siguiente'):'Dos semanas haciendo tu entreno y tu deporte completos sin dolor por encima de 2/10 ni empeorar al día siguiente';
   const g=(lbl,key,vals)=>`<div class="rhq"><span>${lbl}</span><div class="chips">${vals.map(([v,t,c])=>`<button type="button" class="chip sm rh${c}" data-rhc="${key}|${v}" aria-pressed="${C[key]===v}">${t}</button>`).join('')}</div></div>`;
-  return `<div class="rhp"><div class="rhh"><div><small>Plan de readaptación</small><b>${esc(zonaTxt(S,1))}</b></div><span class="rhwk">Semana ${wk} en esta fase</span></div>
+  return `<div class="rhp${compact?' cmp':''}">${compact?'':`<div class="rhh"><div><small>Plan de readaptación</small><b>${esc(zonaTxt(S,1))}</b></div><span class="rhwk">Semana ${wk} en esta fase</span></div>`}
    <ol class="rhst">${step}</ol>
    <div class="rhgoal"><b>Fase ${k+1} · ${esc(P[2])}</b><p>${esc(P[3])}</p><span>${esc(P[4])} · antes de entrenar o en días de descanso</span></div>
    ${E.fis.length?`<h4 class="rhsub">Pauta de tu fisio <em>prioritaria</em></h4><ul class="rhl">${li(E.fis)}</ul>`:''}
@@ -4196,7 +4227,7 @@ function shopCost(L){return L.items.reduce((t,o)=>{const p=PRICE[o.name]??PRICE[
 function chainsFor(prov){const r=PROVS[prov];if(!r)return [];return [...new Set([...CHAIN_NAT,...(CHAIN_REG[r]||[])])].filter(c=>OCUIDX[c]);}
 const eur=x=>x.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 let PCOPEN=false;
-document.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('pcmp'))PCOPEN=e.target.open;if(e.target.classList&&e.target.classList.contains('pinfo')&&!e.target.closest('#rehabsec'))PINFO=e.target.open},true);
+document.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('injx'))INJOPEN=e.target.open;if(e.target.classList&&e.target.classList.contains('pcmp'))PCOPEN=e.target.open;if(e.target.classList&&e.target.classList.contains('pinfo')&&!e.target.closest('#rehabsec'))PINFO=e.target.open},true);
 function priceCmpHTML(L){const sel=`<select class="sel" data-k="provincia" aria-label="Tu provincia"><option value="">Elige tu provincia…</option>${Object.keys(PROVS).sort((a,b)=>a.localeCompare(b,'es')).map(p=>`<option${p===S.provincia?' selected':''}>${esc(p)}</option>`).join('')}</select>`;
   const box=(teaser,body)=>`<details class="pcmp"${PCOPEN?' open':''}><summary><span class="pct"><b>¿Dónde sale más barata?</b><small>${teaser}</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><div class="pcbody">${body}</div></details>`;
   if(S.pais&&S.pais!=='España')return box('Solo disponible en España',`<p class="volnote" style="margin:0">De momento la comparativa de supermercados solo está disponible en España.</p>`);
@@ -4646,16 +4677,16 @@ function summary(){
     const v=d.dolorMov??0,col=v<=3?'var(--ok)':v<=5?'var(--warn)':'var(--bad)',lbl=v<=3?'Verde: se puede progresar':v<=5?'Ámbar: mantener o reducir carga':'Rojo: parar y consultar';
     const fase={'Aguda':'Movilidad suave sin dolor e isométricos.','Subaguda':'Isométricos y ejercicios con rango controlado.','Recuperando función':'Fuerza progresiva en todo el rango de movimiento.','Vuelta al deporte':'Potencia, pliometría y gestos del deporte.'}[d.fase]||'—';
     const evita=(d.movimientos||[]).filter(x=>x!=='Ninguno concreto');
-    h+=`<section class="block" id="rehabsec"><div class="block-h"><h2>Protocolo de lesión</h2><button class="link" data-act="goto" data-id="lesion">Editar</button></div>
-     ${rehabPlanHTML()}
-     <details class="volx pinfo"><summary>Detalles de la lesión<small>Semáforo, qué se evita en el entreno y pautas del fisio</small></summary><div class="pinfob">
+    h+=`<section class="injsec" id="rehabsec"><details class="injx"${INJOPEN?' open':''}>${injSummaryHTML()}<div class="injb">
+     ${rehabPlanHTML(1)}
+     <details class="volx pinfo injdet"><summary>Detalles de la lesión<small>Semáforo, qué se evita en el entreno y pautas del fisio</small></summary><div class="pinfob">
      <dl class="kv"><dt>Zona</dt><dd>${d.zona?esc(zonaTxt(d,1)):'—'}</dd>
      <dt>Fase</dt><dd>${esc(d.fase||'—')}: ${esc(fase)}</dd>
      <dt>Semáforo</dt><dd><span class="sem"><span class="dot" style="background:${col}"></span>${esc(lbl)}</span><br><span style="color:var(--muted);font-size:13px">Dolor al moverte ${v}/10 · al día siguiente ${d.dolor24??'—'}/10</span></dd>
      ${evita.length?`<dt>Se evita</dt><dd>${esc(evita.join(', '))}</dd>`:''}
      <dt>Tu plan</dt><dd>${esc(injPlanTxt())}</dd>
      ${d.fisio==='Sí'?`<dt>Pautas del fisio</dt><dd>${d.fisioSi?'Incluir: '+esc(d.fisioSi)+'<br>':''}${d.fisioNo?'Nunca programar: '+esc(d.fisioNo):''}${!d.fisioSi&&!d.fisioNo?'Sin indicaciones registradas':''}</dd>`:`<dt>Fisio</dt><dd>Recomendamos que un profesional valore la lesión.</dd>`}
-     </dl></div></details></section>`;
+     </dl><button class="link" data-act="goto" data-id="lesion">Editar la lesión</button></div></details></div></details></section>`;
   }
 
   h+=respSummary();
