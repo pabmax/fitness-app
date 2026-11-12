@@ -1187,6 +1187,29 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 .xpan h3{font-size:20px;margin:0}.xpan p{margin:0 0 6px;font-size:14px}.xpan .cfx{max-width:none}.xpan .cfx .link{justify-self:center}
 @keyframes xdrop{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.xpan{animation:none}}
+
+/* ---------- Rutina de deporte ---------- */
+.spr{margin-top:12px;border-radius:20px;background:#1A1A1E;padding:14px;border:1px solid #2a2a33}
+.spr.done{border-color:rgba(43,212,106,.45)}
+.sprh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.sprh small{font:600 11.5px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:#F2994A}
+.sprh h4{margin:3px 0 0;font:800 21px/1.1 var(--f-q);color:#fff}
+.sprt{flex:none;background:#24242c;border-radius:99px;padding:5px 10px;font:600 12px var(--f-ui);color:#cfcfd6;white-space:nowrap}
+.sprb{display:grid;gap:10px;margin-top:12px}
+.sprs{display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px}
+.sprs>i{width:26px;height:26px;border-radius:50%;background:#2a2a33;display:grid;place-items:center;font:700 12px var(--f-ui);font-style:normal;color:#cfcfd6}
+.sprs.main>i{background:#F2994A;color:#1a0d00}
+.sprs b{display:block;font:700 14.5px var(--f-ui);color:#fff;margin:3px 0 4px}
+.sprs.main{background:rgba(242,153,74,.1);border-radius:14px;padding:10px;margin:0 -4px}
+.sprs p{margin:0;font-size:14px;color:#e2e2e8}
+.sprs ul{margin:0;padding:0;list-style:none;display:grid;gap:5px}
+.sprs li{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;color:#cfcfd6}.sprs li b{display:inline;margin:0;font:600 12.5px var(--f-mono);color:#9a9aa3;white-space:nowrap}
+.sprtip{margin:12px 0 0;font-size:13px;color:#9a9aa3}
+.sprq{margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid #2a2a33;padding-top:12px}.sprq span{font:600 14px var(--f-ui)}
+.sprlog{margin-top:12px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #2a2a33;padding-top:10px}.sprlog span{color:#2BD46A;font:600 14px var(--f-ui)}
+.qk.sq{background:linear-gradient(150deg,#3a2408,#7a4a12)}.qk.sq small{color:#ffd59a}.qk.sq p{color:#f5e2c6}
+.qk.sq.done{background:linear-gradient(150deg,#0f2e1d,#1a5a37)}
+.qkok{flex:1;display:grid;place-items:center;height:48px;border-radius:14px;background:rgba(255,255,255,.14);color:#fff;font:700 15px var(--f-ui)}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -1916,6 +1939,8 @@ app.addEventListener('click',e=>{
   const hg=e.target.closest('[data-hguide]');if(hg){HELP.q=HGUIDES.find(x=>x[0]===hg.dataset.hguide)[1];const L=helpLists(hg.dataset.hguide);document.getElementById('hfaq').innerHTML=L.f;document.getElementById('hgds').innerHTML=L.g;const i=document.getElementById('hq');if(i)i.value=HELP.q;return}
   const ck=e.target.closest('[data-ctipok]');if(ck){S.tips={...(S.tips||{}),[ck.dataset.ctipok]:1};save();ck.closest('.ctip').remove();return}
   const sg=e.target.closest('[data-stgoal]');if(sg){S.pasosMeta=Math.max(2000,Math.min(30000,stepGoal()+ +sg.dataset.stgoal));save();render(true);toast('Meta: '+fmt(S.pasosMeta)+' pasos');return}
+  const spd=e.target.closest('[data-spdone]');if(spd){const v=spd.dataset.spdone,ix=v.lastIndexOf('|'),k=v.slice(0,ix),f=v.slice(ix+1);REG.sport={...(REG.sport||{}),[k]:{f,t:Date.now()}};markDay();regSave();render(true);toast('Deporte registrado · '+f.toLowerCase());const b=newBadge();if(b)setTimeout(()=>celebrate('★','Logro: '+b[1],b[2]+'.'),600);return}
+  const spu=e.target.closest('[data-spundo]');if(spu){const r={...(REG.sport||{})};delete r[spu.dataset.spundo];REG.sport=r;regSave();render(true);toast('Registro deshecho');return}
   const qs=e.target.closest('[data-qset]');if(qs){const [w,si]=qs.dataset.qset.split('|').map(Number);quickSet(w,si);return}
   const bdg=e.target.closest('[data-badge]');if(bdg){const b=BADGES.find(x=>x[0]===bdg.dataset.badge),{got}=badgeState();if(b)toast((got[b[0]]?'Conseguido: ':'Pendiente: ')+b[2]);return}
   const bz=e.target.closest('[data-bz]');if(bz){bzPick(bz.dataset.bz);return}
@@ -2711,6 +2736,63 @@ function weekMenuHTML(np,w){const wk=nutWeek(np,w),DL=['L','M','X','J','V','S','
   return `<details class="volx wmenu"><summary>Menú de toda la semana ${w}</summary><div class="wml">${wk.map(wd=>{const rows=mealSplit(np,wd,w).rows,M=dayMenu(rows,w,wd.i);
     return `<button type="button" class="wmd" data-nday="${wd.i}"><b>${DL[wd.i]}</b><span>${M.map(m=>`<i><small>${esc(m.row.n)}</small>${esc(m.none?'—':m.name)}</i>`).join('')}</span></button>`}).join('')}</div></details>`;}
 /* ---------- Entrenamiento día a día ---------- */
+
+/* ---------- Rutina de los días de deporte: calentamiento, sesión por semana del bloque y prevención ----------
+   w: sesión de cada semana del bloque (1–4 progresa, 5 = descarga). Las pautas de prevención siguen programas
+   con evidencia (FIFA 11+ en fútbol, excéntricos de gemelo y muñeca, rotadores externos de hombro). */
+const SPLAN={
+ 'Running':{min:'40–60 min',wu:[['Trote muy suave','5 min'],['Balanceos de pierna adelante y lateral','10 por lado'],['Skipping y talones al glúteo','2 × 20 m'],['Progresivos (de suave a rápido)','3 × 60 m']],
+  w:[['Rodaje suave','30–40 min en zona 2: puedes hablar en frases completas.'],['Cambios de ritmo','10 min suave + 6 × 1 min vivo (2 min trote entre medias) + 10 min suave.'],['Ritmo controlado','10 min suave + 3 × 6 min a ritmo de 10 km (2 min trote) + 8 min suave.'],['Tirada larga','50–60 min suave y 4 rectas de 80 m al final.'],['Descarga','25–30 min muy suave. Sin series.']],
+  cd:[['Caminar','5 min'],['Gemelo excéntrico en escalón','2 × 12'],['Estiramiento de flexor de cadera','30 s por lado']]},
+ 'Ciclismo':{min:'60–120 min',wu:[['Pedaleo progresivo','10 min'],['Cadencia alta (100+ rpm)','3 × 30 s']],
+  w:[['Fondo suave','60–90 min en zona 2, cadencia 85–95 rpm.'],['Fondo con cadencia','60 min suave con 5 × 1 min a cadencia alta.'],['Umbral','15 min suave + 3 × 8 min fuerte pero sostenible (4 min suave) + 10 min suave.'],['Salida larga','1 h 30 – 2 h suave. Come cada 45 min.'],['Descarga','45 min muy suave.']],
+  cd:[['Pedaleo suave','10 min'],['Estiramiento de glúteo y flexor de cadera','30 s por lado'],['Movilidad de espalda alta (gato-vaca)','10 repeticiones']]},
+ 'Fútbol':{min:'60–90 min',wu:[['Carrera suave con movilidad (programa FIFA 11+)','8 min'],['Sentadillas y zancadas','2 × 10'],['Saltos laterales controlados','2 × 10'],['Sprints progresivos','3 × 30 m']],
+  w:[['Partido o entrenamiento','Juega con normalidad. Si entrenas por tu cuenta: 15 min de técnica con balón + juego reducido 3 × 6 min.'],['Velocidad','Tras calentar: 6 × 30 m de sprint, volviendo andando. Después, tu entrenamiento o partido.'],['Partido o entrenamiento','Céntrate en los cambios de dirección: frena con la cadera baja y las rodillas alineadas.'],['Partido o entrenamiento','Semana de más carga: si hay pierna en el gimnasio, el plan ya la ha separado de este día.'],['Descarga','Técnica y rondos suaves 45 min, sin sprints máximos.']],
+  cd:[['Curl nórdico de isquios (prevención)','2 × 5'],['Plancha Copenhague (aductores)','2 × 20 s por lado'],['Estiramientos suaves de piernas','5 min']]},
+ 'Pádel / tenis':{min:'60–90 min',wu:[['Rotación externa de hombro con banda','2 × 15'],['Círculos de muñeca y antebrazo','20 s cada sentido'],['Desplazamientos laterales y split-step','3 × 20 m'],['Peloteo suave desde el fondo','5 min']],
+  w:[['Partido','Juega tu partido con normalidad.'],['Técnica + partido','20 min de técnica (volea, bandeja o revés) y después partido.'],['Partido con objetivo','Busca subir a la red tras un buen globo o resto profundo.'],['Partido largo','Si juegas más de 90 min, bebe cada cambio de lado y toma algo de hidratos.'],['Descarga','Peloteo y técnica suave, 45 min, sin partido competitivo.']],
+  cd:[['Rotación externa de hombro con banda (prevención)','2 × 15'],['Excéntrico de muñeca con peso ligero (codo de tenista)','2 × 15'],['Estiramiento de pectoral y gemelo','30 s por lado']]},
+ 'Baloncesto':{min:'60–90 min',wu:[['Movilidad de tobillo contra la pared','10 por lado'],['Saltos pogo (rebotes cortos)','2 × 15'],['Desplazamientos defensivos','2 × 20 m'],['Tiros suaves','5 min']],
+  w:[['Partido o entrenamiento','Juega con normalidad. Si entrenas solo: 3 bloques de 10 min de tiro, bote y sprint.'],['Aterrizajes','Antes de jugar: 2 × 6 caídas desde un banco, aterrizando suave con las rodillas alineadas.'],['Partido o entrenamiento','Trabaja los cambios de ritmo y el rebote.'],['Partido o entrenamiento','Semana de más carga: mantén el día de pierna lejos de este.'],['Descarga','Tiro y técnica suave 45 min, sin saltos máximos.']],
+  cd:[['Gemelo excéntrico en escalón','2 × 12'],['Aterrizajes controlados (prevención de rodilla)','2 × 6'],['Estiramiento de cuádriceps y gemelo','30 s por lado']]},
+ 'Natación':{min:'45–60 min',wu:[['Nado suave alternando estilos','200 m'],['Técnica (patada con tabla y brazada a un brazo)','4 × 25 m']],
+  w:[['Aeróbico','6 × 100 m crol a ritmo cómodo, 20 s de descanso.'],['Progresivos','8 × 50 m de menos a más (20 s) + 200 m con pull-buoy.'],['Ritmo medio','4 × 200 m a ritmo medio, 30 s de descanso.'],['Continuo','1.500 m seguidos a ritmo suave, cambiando de estilo cada 300 m si lo necesitas.'],['Descarga','800 m técnicos y suaves.']],
+  cd:[['Espalda muy suave','100 m'],['Rotación externa de hombro con banda','2 × 15'],['Estiramiento de dorsal y pectoral','30 s por lado']]},
+ 'Artes marciales':{min:'60–90 min',wu:[['Movilidad de cuello, hombros y cadera','3 min'],['Comba','3 min'],['Sombra suave','2 × 2 min']],
+  w:[['Técnica + combate','20 min de técnica y el resto de la clase con normalidad.'],['Técnica','Prioriza la calidad: misma técnica, más repeticiones y menos intensidad.'],['Combate controlado','Asaltos de 2–3 min al 70 % con 1 min de descanso.'],['Clase completa','Semana de más carga: hidrátate bien y llega descansado.'],['Descarga','Técnica suave y movilidad, sin combate.']],
+  cd:[['Movilidad de cadera y cuello','3 min'],['Respiración lenta (4 s inspirar, 6 s espirar)','3 min']]},
+ 'Escalada':{min:'60–120 min',wu:[['Movilidad de hombro y muñeca','3 min'],['Vías o bloques muy fáciles','10 min'],['Colgarse de canto grande con pies apoyados','3 × 10 s']],
+  w:[['Volumen fácil','Muchas vías o bloques 2–3 grados por debajo de tu máximo.'],['Bloque proyecto','4–6 intentos a un bloque difícil, 3 min de descanso entre intentos.'],['Técnica de pies','Repite vías fáciles en silencio: pies precisos y sin ruido.'],['Resistencia','4 × 4: cuatro bloques seguidos, 4 veces, con 4 min de descanso.'],['Descarga','Escalada fácil y divertida, sin proyectos.']],
+  cd:[['Extensores de dedos con goma elástica','2 × 20'],['Estiramiento de antebrazo y dorsal','30 s por lado']]},
+ 'Hyrox / CrossFit':{min:'60 min',wu:[['Remo o bici suave','5 min'],['Movilidad de cadera y hombro','3 min'],['2 rondas: 10 sentadillas + 10 balanceos de kettlebell ligeros','—']],
+  w:[['Técnica + EMOM','10 min de técnica y EMOM de 12 min a ritmo cómodo.'],['Intervalos','5 rondas de 500 m remo + 20 wall balls, 2 min de descanso.'],['Simulación parcial','4 estaciones a ritmo de competición con 1 km de carrera entre medias.'],['Trabajo largo','30–40 min continuos a ritmo moderado (zona 2–3).'],['Descarga','Técnica ligera y 20 min de cardio suave.']],
+  cd:[['Caminar','5 min'],['Movilidad de cadera y espalda alta','5 min']]},
+ 'Yoga / pilates':{min:'40–60 min',wu:[['Respiración tranquila','2 min'],['Gato-vaca','10 repeticiones']],
+  w:[['Cadera','Sesión centrada en apertura de cadera.'],['Columna','Sesión de movilidad de espalda y rotaciones.'],['Hombros','Sesión de hombros y espalda alta.'],['Core','Sesión de control del tronco y equilibrio.'],['Relajación','Sesión suave y restaurativa.']],
+  cd:[['Relajación tumbado','5 min']]},
+ 'Senderismo':{min:'1–3 h',wu:[['Caminar suave','10 min'],['Movilidad de tobillo y cadera','2 min']],
+  w:[['Ruta llana','1–2 h a ritmo cómodo.'],['Ruta con desnivel','Desnivel moderado; usa bastones en las bajadas.'],['Ruta llana','1–2 h; añade algún tramo a paso vivo.'],['Ruta larga','La más larga del bloque: lleva agua y algo de comer.'],['Descarga','Paseo de 1 h por terreno fácil.']],
+  cd:[['Estiramiento de gemelo y cuádriceps','30 s por lado']]},
+ 'Otro':{min:'45–60 min',wu:[['Movilidad general','5 min'],['Activación (sentadillas, flexiones suaves, zancadas)','2 × 10'],['Primeros minutos de tu actividad a ritmo suave','5 min']],
+  w:[['Sesión normal','Haz tu actividad con normalidad.'],['Técnica','Dedica parte de la sesión a mejorar la técnica.'],['Intensidad','Incluye algunos tramos más intensos.'],['Volumen','Semana de más carga: algo más de duración.'],['Descarga','Sesión más corta y suave.']],
+  cd:[['Movilidad y estiramientos suaves','5–10 min']]}};
+const spKey=(w,i,n)=>`c${REG.cur||1}|${w}|${i}|${n}`;
+function sportSession(x,w){const o=sportsList().find(y=>spName(y)===x.name)||{},dep=o.dep||'Otro',P=SPLAN[dep]||SPLAN.Otro,int=(x.int||o.int||'Moderada');
+  let k=Math.min(5,Math.max(1,w))-1;if(int==='Suave'&&k>=1&&k<=3&&['Running','Ciclismo','Natación','Hyrox / CrossFit'].includes(dep))k=0;
+  return {dep,P,int,s:P.w[k]}}
+function sportCardHTML(x,w,i){const {dep,P,int,s}=sportSession(x,w),key=spKey(w,i,x.name),log=(REG.sport||{})[key];
+  const li=a=>a.map(([t,d])=>`<li><span>${esc(t)}</span>${d&&d!=='—'?`<b>${esc(d)}</b>`:''}</li>`).join('');
+  return `<div class="spr${log?' done':''}"><div class="sprh"><div><small>Deporte · semana ${w}${w===5?' · descarga':''}</small><h4>${esc(x.name)}</h4></div><span class="sprt">${esc(P.min)} · ${esc(int.toLowerCase())}</span></div>
+   <div class="sprb"><div class="sprs"><i>1</i><div><b>Calentamiento</b><ul>${li(P.wu)}</ul></div></div>
+   <div class="sprs main"><i>2</i><div><b>${esc(s[0])}</b><p>${esc(s[1])}</p></div></div>
+   <div class="sprs"><i>3</i><div><b>Vuelta a la calma y prevención</b><ul>${li(P.cd)}</ul></div></div></div>
+   <p class="sprtip">${esc(SPTIP[dep]||SPTIP.Otro)}</p>
+   ${log?`<div class="sprlog"><span>✓ Hecho${log.f?' · '+esc(log.f.toLowerCase()):''}</span><button type="button" class="link small" data-spundo="${esc(key)}">Deshacer</button></div>`
+     :`<div class="sprq"><span>¿Hecho? ¿Qué tal fue?</span><div class="chips">${['Fácil','Normal','Duro'].map(f=>`<button type="button" class="chip sm" data-spdone="${esc(key)}|${f}">${f}</button>`).join('')}</div></div>`}</div>`}
+function sportQuickHTML(w,i,D){if(!D.sp.length)return '';const x=D.sp[0],{s,P}=sportSession(x,w),key=spKey(w,i,x.name),log=(REG.sport||{})[key];
+  return `<div class="qk sq${log?' done':''}"><small>Hoy · ${esc(D.sp.map(y=>y.name).join(' + '))}</small><h3>${esc(s[0])}</h3><p>${esc(s[1])}</p>
+   <div class="qkr">${log?`<span class="qkok">✓ Hecho${log.f?' · '+esc(log.f.toLowerCase()):''}</span>`:`<button type="button" class="qkb" data-spdone="${esc(key)}|Normal">Hecho</button>`}<button type="button" class="qkb ghost${log?'':' sm'}" data-tab="entreno" data-d="${i}">Ver rutina</button></div></div>`}
 const SPTIP={'Running':'Calienta 10 min suave y termina con movilidad de cadera y gemelo.','Ciclismo':'Lleva hidratos y agua si dura más de una hora.','Fútbol':'Calentamiento con carrera suave, movilidad y cambios de ritmo; tras el partido, hidrátate y come proteína con hidratos.','Pádel / tenis':'Calienta hombro y muñeca con banda antes de jugar.','Baloncesto':'Calienta tobillos y rodillas; los saltos cargan mucho: si hay pierna al día siguiente, ve con calma.','Natación':'Cuenta como cardio; alterna estilos para no sobrecargar el hombro.','Artes marciales':'Prioriza la técnica si llegas con fatiga del entrenamiento de fuerza.','Escalada':'Carga mucho dedos y antebrazos: evita tirones pesados el mismo día.','Hyrox / CrossFit':'Es un día duro: no lo juntes con pierna pesada y cuida la técnica con fatiga.','Yoga / pilates':'Perfecto para recuperar: suma movilidad sin fatiga.','Senderismo':'Cuenta como actividad aeróbica suave.','Otro':'Calienta bien y ajusta el esfuerzo si llegas con fatiga.'};
 function trainDayHTML(w,i){
   const W=optimizeWeek(),D=W.day[i],p=plan(),si=p.pattern.indexOf(i),car=W.cardio.includes(i),lvl=dayLevel(i),RT=si>=0?retSes(w,si):0,rir=Math.min(5,RIRW()[w-1]+(RT?2:0)),SKD=sickAt(w,i);
@@ -2725,7 +2807,7 @@ function trainDayHTML(w,i){
       rows=ses.rows.filter(r=>r.c).map(r=>{const n=retN(setsW(r.sets,w),w,si),btn=r.more?`<button type="button" class="link small" data-swap="${r.key}">${r.off?'Siguiente opción':'Otra opción'}</button>`:(r.off?`<button type="button" class="link small" data-swap="${r.key}" data-reset="1">Volver a la mejor</button>`:'');
         return `<li class="ex th"><button type="button" class="thumb" data-tech="${esc(r.c[0])}" aria-label="Ver técnica de ${esc(r.c[0])}">${FIG.svg(r.c[0],1)}</button><div class="exn"><small>${esc(PATN[r.pat])}</small><strong>${esc(r.c[0])}</strong><span class="tag">${esc(r.c[1]?r.c[1].split('+').map(x=>ID2L[x]).join(' + '):'Sin material')}</span>${(()=>{const bm=(r.c[1]||'').split('+').map(x=>brandMachine(ID2L[x])).filter(Boolean)[0];return bm?`<span class="bmach">${esc(bm)}</span>`:''})()}<span class="motivo">${esc(motivo(r.c))}</span>${r.orig?`<span class="swapnote">En lugar de ${esc(r.orig)} · estímulo ${Math.round(r.sim*100)}% similar</span>`:''}${techBtn(r.c[0])}${btn}</div><div class="sets">${n} × ${esc(r.dose.reps)}<small>RIR ${w===5?4:rir} · ${esc(r.dose.rest)}</small></div></li>`}).join('');}
     body+=`<h4 class="tdh">Fuerza · ${esc(D.str)}${S.aiPlan?' <i class="iatag">IA</i>':''} <span>${hm(S.minutos)}${w>=3&&w<5?' · +1 serie por ejercicio':''}${w===5?' · descarga: la mitad de series':''}</span></h4><ol class="exs">${rows}</ol>`;}
-  D.sp.forEach(x=>{const o=sportsList().find(y=>spName(y)===x.name)||{};body+=`<div class="tdsp"><b>${esc(x.name)}</b><span>Intensidad ${esc((x.int||o.int||'moderada').toLowerCase())}${x.auto?' · día propuesto por la app':''}${x.end?' · cuenta como cardio':''}</span><p>${esc(SPTIP[o.dep]||SPTIP.Otro)}</p></div>`});
+  D.sp.forEach(x=>{body+=sportCardHTML(x,w,i)});
   if(car||(si>=0&&respOn()))body+=respCard(w,si>=0?'Al terminar: trabajo respiratorio':'Hoy: trabajo respiratorio');
   if(!it.length)body+=`<div class="tdrest"><b>Descanso</b><p>Recuperar también es entrenar: camina 20–30 minutos, haz 10 minutos de movilidad suave y procura dormir 7–9 horas.${respParts().includes('Músculos inspiratorios')?' Mantén tus 2 series de entrenamiento inspiratorio.':''}</p></div>`;
   if(SKD)return `<div class="ndet tdet"><div class="ndh"><div><b>${DSEM[i]} · semana ${w}</b><span>${it.length?esc(it.join(' + '))+' · en pausa':'Descanso'}</span></div><span class="nlv big sk">${THERMO}${ENF()}</span></div>
@@ -4096,7 +4178,7 @@ function rvHomeHTML(OW,w,r){const ti=todayI(),D=OW.day[ti],p=plan(),si=p.pattern
     shopC?`<button type="button" class="rvwt" data-tab="compra"><small>Compra de la semana</small><b>${eur(shopC.v)}</b><em style="color:var(--muted)">en ${esc(shopC.c)}</em><span class="bar"><i style="width:${Math.min(100,shopC.v/(S.shopBudget||70)*100).toFixed(0)}%;background:${shopC.v>(S.shopBudget||70)?'#FF5A5F':'#7B6CFF'}"></i></span></button>`:`<button type="button" class="rvwt" data-act="registro"><small>Registro</small><b>${loggedSessions(curC()).length}</b><em style="color:var(--muted)">sesiones en el bloque ${curC()}</em></button>`,
     `<button type="button" class="rvwt" data-tab="miplan"><small>Próxima revisión</small><b style="font-size:19px">${re.toLocaleDateString('es-ES',{day:'numeric',month:'short'})}</b><em style="color:var(--muted)">medidas y objetivos</em></button>`,
     S.lesion==='Sí'?`<button type="button" class="rvwt" data-tab="entreno"><small>${esc((ZONAG[S.zona]||[S.zona||'Lesión'])[0].replace(/^./,c=>c.toUpperCase()))}</small><b>${S.dolorMov??0}/10</b><em style="color:${(S.dolorMov??0)<=3?'#2BD46A':(S.dolorMov??0)<=5?'#FFB340':'#FF5A5F'}">● ${(S.dolorMov??0)<=3?'semáforo verde':(S.dolorMov??0)<=5?'semáforo ámbar':'semáforo rojo'}</em></button>`:`<button type="button" class="rvwt" data-tab="nutri"><small>Proteína de hoy</small><b>${wd?wd.p+' g':'—'}</b><em style="color:var(--muted)">${np?fmt(np.pkg,1)+' g por kg':''}</em></button>`];
-  return `${bal}<div class="rvdots"><i class="on"></i><i></i><i></i></div>${acts}${si>=0&&!skT?quickHTML(w,si):''}${promo}${card}${badgesHTML()}<div class="rvsec">Widgets<button type="button" data-act="widgets" aria-label="Añadir widget">+</button></div><div class="rvw" style="margin-top:6px">${tiles.join('')}</div><div style="height:10px"></div>`;}
+  return `${bal}<div class="rvdots"><i class="on"></i><i></i><i></i></div>${acts}${si>=0&&!skT?quickHTML(w,si):(!skT?sportQuickHTML(w,ti,D):'')}${promo}${card}${badgesHTML()}<div class="rvsec">Widgets<button type="button" data-act="widgets" aria-label="Añadir widget">+</button></div><div class="rvw" style="margin-top:6px">${tiles.join('')}</div><div style="height:10px"></div>`;}
 
 /* ---------- Motivación diaria: racha, series con un toque, logros y celebraciones ---------- */
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
