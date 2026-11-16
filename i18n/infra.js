@@ -14,6 +14,8 @@ function trS(t,deep){if(EN[t]!=null)return EN[t];
   if(nums.length&&EN[k]!=null)return EN[k].replace(/\{(\d+)\}/g,(_,i)=>numEN(nums[+i]));
   for(const [rx,f] of EN_RX){const m=t.match(rx);if(m){const r=typeof f==='function'?f(...m):t.replace(rx,f);if(r!=null)return r}}
   if(!deep){for(const sep of [' · ',' — ',': ',' + ',', ']){if(t.includes(sep)){const ps=t.split(sep),tp=ps.map(p=>{const q=p.trim();if(!q||!/[A-Za-zÁ-ú]/.test(q))return p;const r=trS(q,1);return r==null?null:p.replace(q,r)});if(tp.every(x=>x!=null))return tp.join(sep)}}}
+  if(!deep&&/[.!?] [A-ZÁÉÍÓÚ¿¡]/.test(t)){const ps=t.split(/(?<=[.!?]) (?=[A-ZÁÉÍÓÚ¿¡])/),tp=ps.map(p=>trS(p,1));if(tp.every(x=>x!=null))return tp.join(' ')}
+  if(t.length>2&&t===t.toUpperCase()&&/[A-ZÁÉÍÓÚÑ]{2}/.test(t)){const lo=t[0]+t.slice(1).toLowerCase(),r=trS(lo,1);if(r!=null)return r.toUpperCase()}
   const end=t.match(/^(.*?)([.:!?…]+)$/);if(end&&end[1]&&EN[end[1]]!=null)return EN[end[1]]+end[2];
   if(t[0]!==t[0].toUpperCase()){const up=t[0].toUpperCase()+t.slice(1);if(EN[up]!=null){const r=EN[up];return r[0].toLowerCase()+r.slice(1)}}
   return null}
