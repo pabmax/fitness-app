@@ -90,6 +90,8 @@ Para que funcione para todos los usuarios hace falta un servidor propio con una 
 ---
 
 ## Hecho recientemente ✅
+- Idioma español / inglés con bandera en la barra superior (unos 2.700 textos traducidos). Pendiente: revisión por una persona nativa, sobre todo de salud y lesiones.
+- Modo enfermo desde Mi plan, con aviso solo mientras está activo.
 - Cuestionario con una pregunta por pantalla, ruedas, silueta para lesiones, previsión a 10 semanas y creación del plan animada.
 - Inicio con racha, siguiente serie con un toque, 9 logros y celebraciones.
 - Versión web para pantallas 16:9.

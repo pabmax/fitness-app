@@ -7,7 +7,8 @@ for f in sorted(glob.glob('/home/claude/i18n/en_*.json')):
     EN.update(json.load(open(f,encoding='utf-8')))
 rx=open('/home/claude/i18n/rx.js',encoding='utf-8').read() if __import__('os').path.exists('/home/claude/i18n/rx.js') else ''
 infra=open('/home/claude/i18n/infra.js',encoding='utf-8').read()
-block='<script id="i18n">\nconst EN='+json.dumps(EN,ensure_ascii=False,separators=(',',':'))+';\nconst EN_RX=['+rx+'];\n'+infra+'</script>\n'
+dish=open('/home/claude/i18n/dish.json',encoding='utf-8').read()
+block='<script id="i18n">\nconst EN_DISH='+json.dumps(json.loads(dish),ensure_ascii=False,separators=(',',':'))+';\nconst EN='+json.dumps(EN,ensure_ascii=False,separators=(',',':'))+';\nconst EN_RX=['+rx+'];\n'+infra+'</script>\n'
 if '<script id="i18n">' in s:
     s=re.sub(r'<script id="i18n">.*?</script>\n',lambda m:block,s,flags=re.S)
 else:

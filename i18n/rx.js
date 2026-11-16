@@ -22,8 +22,8 @@
 ,[/^Ver técnica de (.+)$/,(m,a)=>{const r=trS(a,1);return r?'See technique for '+r:null}]
 ,[/^Ver cómo se hace: (.+)$/,(m,a)=>{const r=trS(a,1);return r?'See how to do it: '+r:null}]
 ,[/^(.+), serie (\d+), (peso|repeticiones|RIR)$/,(m,a,n,f)=>{const r=trS(a,1);return r?r+', set '+n+', '+({peso:'weight',repeticiones:'reps',RIR:'RIR'})[f]:null}]
-,[/^Cambiar (.+) por otro plato$/,(m,a)=>{const r=trS(a,1);return r?'Swap '+r+' for another dish':null}]
-,[/^Ver receta: (.+)$/,(m,a)=>{const r=trS(a,1);return r?'See recipe: '+r:null}]
+,[/^Cambiar (.+) por otro plato$/,(m,a)=>'Swap '+(trS(a,1)||a)+' for another dish']
+,[/^Ver receta: (.+)$/,(m,a)=>'See recipe: '+(trS(a,1)||a)]
 ,[/^Ver (Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo)(: (enfermo|enferma))?$/,(m,a,b)=>'See '+EN[a]+(b?': sick':'')]
 ,[/^Próxima sesión de (.+):$/,(m,a)=>'Next '+(trS(a,1)||a)+' session:']
 ,[/^Juega tu partido aplicando lo que trabajaste en la última sesión: (.+)\.$/,(m,a)=>'Play your match applying what you worked on last session: '+(trS(a[0].toUpperCase()+a.slice(1),1)||a).toLowerCase()+'.']
@@ -38,3 +38,12 @@
 ,[/^PLATO DEL DÍA · ([A-ZÁÉÍÓÚÑ]+)$/,(m,d)=>{const r=trS(d[0]+d.slice(1).toLowerCase(),1);return r?'DISH OF THE DAY · '+r.toUpperCase():null}]
 ,[/^(Technogym|Life Fitness|Hammer Strength|Matrix) · (.+)$/,(m,a,b)=>m]
 ,[/^Tus sesiones de (.+) cuentan como parte de este trabajo\.$/,(m,a)=>'Your '+a.split(/, | y /).map(x=>trS(x,1)||x).join(' and ')+' sessions count as part of this work.']
+,[/^Para (.+?)(?: y (\d+) más)?$/,(m,a,n)=>/[áéíóúñ]| con | de /.test(a)?null:'For '+a+(n?' and '+n+' more':'')]
+,[/^Te faltan unos (\d+) g de proteína al día\. Por ejemplo: (.+)\.$/,(m,n,l)=>'You\'re short about '+n+' g of protein a day. For example: '+l.split(/, (?=\d)/).map(x=>{const q=x.match(/^(\d+) g de (.+) en (desayuno|comida|cena|merienda) \(\+(\d+) g\)$/);if(!q)return x;const f=trS(q[2][0].toUpperCase()+q[2].slice(1),1);return q[1]+' g of '+(f?f.toLowerCase():q[2])+' at '+({desayuno:'breakfast',comida:'lunch',cena:'dinner',merienda:'snack'})[q[3]]+' (+'+q[4]+' g)'}).join(', ')+'.']
+,[/^(Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo): (\d+) kcal, (?:carga (alta|media|baja)|(enfermo|enferma))$/,(m,d,k,c,sk)=>EN[d]+': '+k+' kcal, '+(sk?'sick':({alta:'high',media:'medium',baja:'low'})[c]+' load')]
+,[/^PLATO DEL DÍA · ADAPTADO$/,()=>'DISH OF THE DAY · ADAPTED']
+
+,[/^(.+) hoy$/,(m,a)=>{const r=trS(a,1);return r?r+' today':null}]
+,[/^Casi cuadra: (.+) respecto al objetivo de esta comida$/,(m,a)=>'Almost fits: '+a.replace(/ de grasa/g,' fat').replace(/ de hidratos/g,' carbs').replace(/ de proteína/g,' protein')+' compared with this meal\'s target']
+
+,[/^Receta: (.+)$/,(m,a)=>'Recipe: '+(trS(a,1)||a)]

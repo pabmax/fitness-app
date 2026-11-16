@@ -45,11 +45,12 @@
 | 🩹 **Lesiones** | Readaptación progresiva de la zona lesionada, integrada en el plan. |
 | 📈 **Registro y progreso** | Series con peso, repeticiones y RIR, predicción de cargas, gráficas por sesión, ejercicio y bloque. Incluye una simulación de 10 semanas. |
 | 🥗 **Nutrición** | Fases (mantenimiento, volumen, definición, recomposición), macros por día según la carga, macros editables por kg y menú semanal con recetas paso a paso. Las comidas pre y post entreno se adaptan al tiempo que falta para entrenar. |
-| 🤒 **Modo enfermo** | Marca los días de enfermedad desde Entreno o Nutrición: el plan, la dieta y el histórico se adaptan sin contarlo como fallo, con una vuelta gradual. |
+| 🤒 **Modo enfermo** | Se activa desde Mi plan → «Me encuentro mal»; mientras está activo, un aviso arriba en Inicio, Entreno y Nutrición: el plan, la dieta y el histórico se adaptan sin contarlo como fallo, con una vuelta gradual. |
 | 🛒 **Lista de la compra** | Se genera desde el menú, con checklist por secciones del súper, presupuesto y comparativa del precio medio entre supermercados de tu provincia. |
 | ❓ **Tutorial y ayuda** | Tutorial de 5 pasos al empezar, botón de ayuda siempre visible con buscador, guías y preguntas frecuentes, y pistas la primera vez que entras en cada sección. |
 | 👥 **Perfiles** | Varias personas en el mismo dispositivo, cada una con su plan. |
 | 🔬 **Base científica** | Fuentes de cada parámetro, separando evidencia y criterio práctico. |
+| 🌍 **Español / English** | Bandera en la barra superior para cambiar de idioma al momento. La primera vez usa el idioma del móvil. Los textos están en `i18n/` (diccionario y reglas) y se inyectan con `i18n/inject.py`. |
 
 ---
 
