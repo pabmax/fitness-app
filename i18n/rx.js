@@ -11,3 +11,9 @@
 [/^(.+) (leve|fuerte)$/i,(m,a,b)=>{const r=trS(a[0].toUpperCase()+a.slice(1),1);if(!r)return null;const lv=b.toLowerCase()==='leve'?'mild':'severe';return a[0]===a[0].toUpperCase()?lv[0].toUpperCase()+lv.slice(1)+' '+r.toLowerCase():lv+' '+r.toLowerCase()}],
 [/^(\d+) Dec$/,(m,a)=>a+' Dec']
 ,[/^en (Alcampo|Mercadona|Carrefour|Lidl|Aldi|Dia|Eroski|Consum|BonÀrea|Bonpreu|Caprabo|Hipercor|El Corte Inglés|Ahorramás|Gadis|Froiz|Masymas|HiperDino|Spar|Covirán|Familia|Alimerka|Lupa|Simply|Hiber|Mercadona Online)$/,(m,a)=>'at '+a]
+,[/^Usaremos las máquinas que fabrica (.+?) y te propondremos solo ejercicios que se pueden hacer con ellas, además del peso libre habitual\.$/,(m,a)=>'We\'ll use the machines '+a+' makes and only suggest exercises that can be done on them, plus the usual free weights.']
+,[/^Recomendada para ti según tu objetivo( y tu lesión)?: (.+)\. Si no eliges ninguna, usaremos esta\.$/,(m,a,b)=>'Recommended for you based on your goal'+(a?' and your injury':'')+': '+(trS(b,1)||b)+'. If you don\'t choose one, we\'ll use this.']
+,[/^(Gramos de|Quitar) (.+)$/,(m,a,b)=>{const r=trS(b,1);return r?(a==='Quitar'?'Remove ':'Grams of ')+r:null}]
+,[/^(\d+(?:[.,]\d+)?) € en (.+)$/,(m,a,b)=>'€'+numEN(a)+' at '+b]
+,[/^(.+?) (derech|izquierd)(?:a|o|os|as)$/i,(m,a,b)=>{const r=trS(a[0].toLowerCase()+a.slice(1),1)||trS(a.toLowerCase(),1);if(!r)return null;const sd=b.toLowerCase()==='derech'?'right':'left';const out=sd+' '+r;return a[0]===a[0].toUpperCase()?out[0].toUpperCase()+out.slice(1):out}]
+,[/^(.+?) de ambos lados$/i,(m,a)=>{const r=trS(a.toLowerCase(),1);return r?(a[0]===a[0].toUpperCase()?r[0].toUpperCase()+r.slice(1):r)+' on both sides':null}]
