@@ -1275,6 +1275,18 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 .injx .rhchk{background:rgba(0,0,0,.28)}
 .injx details.injdet{margin-top:0;background:rgba(0,0,0,.25);border-radius:14px}
 @media (prefers-reduced-motion:reduce){.injchev{transition:none}}
+
+/* ---------- Modo enfermo: franja común y Mi plan ---------- */
+.skbar{display:flex;align-items:center;gap:8px;background:#3A140E;border:1.5px solid #7a2b1c;border-radius:16px;padding:8px 8px 8px 12px;margin:0 0 14px;color:#fff}
+.skbt{all:unset;cursor:pointer;flex:1;min-width:0;display:flex;align-items:center;gap:10px}
+.skbt .thermo{width:22px;height:22px;flex:none;stroke:#FF6B5B;fill:none;stroke-width:2;margin:0}
+.skbt b{display:block;font-size:14.5px}.skbt small{display:block;font-size:12.5px;color:#f1c9c2}.skbt small i{font-style:normal;color:#FF9A8C;font-weight:600}
+.skbt:focus-visible,.skwell:focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:12px}
+.skwell{flex:none;font:600 13px var(--f-ui,inherit);background:#fff;color:#111;border:0;border-radius:99px;padding:8px 12px;cursor:pointer}
+.mpi.mpsk{background:rgba(255,90,95,.08);border:1.5px solid rgba(255,90,95,.4)!important;border-radius:16px;padding-left:10px;padding-right:10px;margin-bottom:6px}
+.skpill{font:700 10.5px var(--f-ui,inherit)!important;font-style:normal;letter-spacing:.06em;background:#FF5A5F;color:#fff!important;border-radius:99px;padding:3px 8px}
+.nfbadge.sk{background:#FF5A5F;color:#fff}
+.pst .b.sk{background:#FF5A5F;color:#fff}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -2580,7 +2592,7 @@ function nutDayHTML(np,wd,w){const W=optimizeWeek(),D=W.day[wd.i],car=W.cardio.i
     ${MS.T.gap?`<div class="ntime">${timeEditHTML(w,wd.i)}${MS.T.pre>=0||MS.T.post>=0?`<span class="tmeals">${MS.T.pre>=0?`${esc(rows[MS.T.pre].n)} antes`:''}${MS.T.pre>=0&&MS.T.post>=0?' · ':''}${MS.T.post>=0?`${esc(rows[MS.T.post].n.toLowerCase())} después`:''}</span>`:''}</div>`:''}
     ${macroDonut(wd,DSEM[wd.i].toLowerCase())}
     ${wd.sick?sickDayHTML('nut',w,wd.i,`Déficit en pausa: hoy comes a mantenimiento (${fmt(wd.k)} kcal) con la misma proteína${wd.sick.type==='Digestivo'?' y menos grasa para que asiente mejor':''}.`):`<p class="ntip">${esc(LVTIP[wd.l])}</p>${spFuelHTML(w,wd.i,wd)}`}
-    ${wd.sick?'':sickDayHTML('nut',w,wd.i)}${menuDayHTML(rows,wd,w)}</div>`;}
+    ${menuDayHTML(rows,wd,w)}</div>`;}
 
 /* ---------- Menú semanal ----------
    Recetas sencillas con huecos por papel: p = fuente de proteína, c = hidratos, f = grasa (son las "palancas"
@@ -2746,6 +2758,14 @@ function sickDayHTML(ctx,w,d,extra){const r=sickAt(w,d);if(!r){return `<button t
   return `<div class="sickb"><div class="sickbh"><span>${THERMO}<b>${ENF()} · ${esc(r.type.toLowerCase())} ${esc(r.lvl.toLowerCase())}</b></span><span class="sickacts"><button type="button" class="mbtn" data-sickwell="${w}|${d}">Ya estoy mejor</button><button type="button" class="mbtn" data-sickopen="${w}|${d}">Editar</button></span></div>
     ${body}<p class="sickflag"><b>Ve al médico si:</b> ${esc(T.flags)}</p></div>`;}
 let SKS=null;
+/* Episodio activo: el que incluye hoy o empieza en los próximos 7 días */
+function sickActive(){const w=Math.min(5,Math.max(1,S.trW||1)),ti=todayI(),pos=(w-1)*7+ti,E=sickEpisodes();
+  const e=E.find(x=>x.start.pos<=pos&&x.end.pos>=pos)||E.find(x=>x.start.pos>pos&&x.start.pos-pos<=7);if(!e)return null;
+  const on=e.start.pos<=pos?{w,d:ti}:{w:e.start.w,d:e.start.d},DL=['L','M','X','J','V','S','D'],cw=e.start.w!==e.end.w;
+  const rng=e.days.length===1?DL[e.start.d]:(cw?'S'+e.start.w+' ':'')+DL[e.start.d]+'–'+(cw?'S'+e.end.w+' ':'')+DL[e.end.d];
+  return {...e,on,rng,lab:e.type.toLowerCase()+' '+e.lvl.toLowerCase(),today:e.start.pos<=pos};}
+function sickBarHTML(){const a=sickActive();if(!a)return '';
+  return `<div class="skbar" role="status"><button type="button" class="skbt" data-sickopen="${a.on.w}|${a.on.d}" aria-label="Editar días de enfermedad">${THERMO}<span><b>${ENF()} · ${esc(a.lab)}</b><small>${a.today?'Entreno en pausa · dieta adaptada':'Empieza el '+DSEM[a.start.d].toLowerCase()}<i> · ${esc(a.rng)}</i></small></span></button><button type="button" class="skwell" data-sickwell="${a.on.w}|${a.on.d}">Ya estoy mejor</button></div>`;}
 function sickSheetHTML(){const {w,d}=SKS,DL=['L','M','X','J','V','S','D'],ed=!!SKS.ep;
   const chip=(k,v,cur)=>`<button type="button" class="chip sm${v===cur?' skon':''}" data-skset="${k}|${v}" aria-pressed="${v===cur}">${esc(v)}</button>`;
   return `<div class="sheetwrap" role="dialog" aria-modal="true" aria-label="Marcar días de enfermedad"><div class="sheetbg" data-act="closesick"></div><div class="sheet sksheet">
@@ -2974,8 +2994,8 @@ function nutSummary(d,r){
      ${S.nutAI?`<ol class="naic">${S.nutAI.map(x=>`<li><b>${esc(x.cambio)}</b><span>${esc(x.motivo)}</span>${x.impacto?`<em>${esc(x.impacto)}</em>`:''}</li>`).join('')}</ol>`:''}`
    :`<div class="reco" style="margin-top:12px"><span class="badge">Punto de partida</span><p>Anota lo que comes en un día normal y verás la diferencia con tu objetivo y los ajustes que haría la app.</p><div class="cta"><button class="btn primary" style="flex:none" data-act="goto" data-id="nut4">Anotar lo que como</button></div></div>`;
   const nhero=(()=>{const wd=wk[nd],rows=mealSplit(np,wd,nw).rows,MM=dayMenu(rows,nw,nd),mi=Math.max(0,rows.findIndex(x=>x.n==='Comida')),m=MM[mi];if(!m||!m.items)return '';
-    return `<div class="nfhero" style="background:${gradFor(m.name)};min-height:250px">${m.items[0]&&false?'':''}<span class="nfbadge">PLATO DEL DÍA · ${DSEM[nd].toUpperCase()}</span><div class="nft" style="font-size:34px">${esc(m.name)}</div><div class="nfm">${(()=>{const ok=Math.abs(m.tot.k-(m.row.p*4+m.row.c*4+m.row.f*9))/Math.max(1,m.row.p*4+m.row.c*4+m.row.f*9)<=.08;return ok?'<b>✓ Cuadra</b> · ':''})()}${fmt(m.tot.k)} kcal · P ${Math.round(m.tot.p)} g · ${esc(m.row.n.toLowerCase())}</div><div class="nfb"><button class="bw" data-rec="${m.k}|${m.rid}">▶ Cocinar</button><button class="bg2" data-mopen="${m.k}">⇄ Opciones</button></div></div>
-    <div class="nfrow"><h3>Tu día: ${fmt(wd.k)} kcal <span>${wd.sick?ENF().toLowerCase():'carga '+cargaF(wd.l)}</span></h3><div class="nfcar">${MM.filter(x=>x.items).map(x=>`<button type="button" class="pst w" data-rec="${x.k}|${x.rid}" aria-label="Ver receta: ${esc(x.name)}" style="background:${gradFor(x.name)}">${x.row.pre?'<span class="b">PRE</span>':x.row.post?'<span class="b g">POST</span>':''}<small>${esc(x.row.n)} · ${fmt(x.tot.k)} kcal</small>${esc(x.name)}</button>`).join('')}</div></div>`})();
+    return `<div class="nfhero" style="background:${wd.sick?'linear-gradient(135deg,#3a140e,#7a2b1c)':gradFor(m.name)};min-height:250px">${m.items[0]&&false?'':''}<span class="nfbadge${wd.sick?' sk':''}">PLATO DEL DÍA · ${wd.sick?'ADAPTADO':DSEM[nd].toUpperCase()}</span><div class="nft" style="font-size:34px">${esc(m.name)}</div><div class="nfm">${(()=>{const ok=Math.abs(m.tot.k-(m.row.p*4+m.row.c*4+m.row.f*9))/Math.max(1,m.row.p*4+m.row.c*4+m.row.f*9)<=.08;return ok?'<b>✓ Cuadra</b> · ':''})()}${fmt(m.tot.k)} kcal · P ${Math.round(m.tot.p)} g · ${esc(m.row.n.toLowerCase())}</div><div class="nfb"><button class="bw" data-rec="${m.k}|${m.rid}">▶ Cocinar</button><button class="bg2" data-mopen="${m.k}">⇄ Opciones</button></div></div>
+    <div class="nfrow"><h3>Tu día: ${fmt(wd.k)} kcal <span>${wd.sick?'mantenimiento · '+ENF().toLowerCase():'carga '+cargaF(wd.l)}</span></h3><div class="nfcar">${MM.filter(x=>x.items).map(x=>`<button type="button" class="pst w" data-rec="${x.k}|${x.rid}" aria-label="Ver receta: ${esc(x.name)}" style="background:${gradFor(x.name)}">${wd.sick?'<span class="b sk">ADAPTADO</span>':x.row.pre?'<span class="b">PRE</span>':x.row.post?'<span class="b g">POST</span>':''}<small>${esc(x.row.n)} · ${fmt(x.tot.k)} kcal</small>${esc(x.name)}</button>`).join('')}</div></div>`})();
   return `${nhero}<section class="block"><div class="block-h"><h2>Nutrición</h2><button class="link" data-act="goto" data-id="nut2">Editar</button></div>
     ${phaseHTML(np)}
     <div class="stats"><div class="stat"><small>Media diaria</small><strong>${fmt(np.avg)}</strong><em>kcal · cambia según el día</em></div><div class="stat"><small>Proteína</small><strong>${np.P} g</strong><em>${fmt(np.pkg,1)} g por kg, todos los días</em></div><div class="stat"><small>Grasas</small><strong>${np.F} g</strong><em>todos los días</em></div><div class="stat"><small>Carbohidratos</small><strong>${Math.min(...np.days.map(x=>x.c))}–${cmax} g</strong><em>según la carga del día</em></div></div>
@@ -4343,7 +4363,7 @@ function inicioHTML(OW,w,r){const ti=todayI(),D=OW.day[ti],p=plan(),si=p.pattern
   if(S.lesion==='Sí')circ.push(`<button type="button" class="circ" data-tab="entreno" data-d="${ti}"><span style="background:linear-gradient(135deg,#2e240e,#7a5a1d)">${icn('knee')}</span>${esc((ZONAG[S.zona]||[S.zona||'Lesión'])[0].replace(/^./,c=>c.toUpperCase()))}</button>`);
   circ.push(`<button type="button" class="circ" data-act="progreso"><span style="background:linear-gradient(135deg,#0e1a2e,#2b4c7e)">${icn('prog')}</span>Progreso</button>`);
   if(nut(S))circ.push(`<button type="button" class="circ" data-tab="compra"><span style="background:linear-gradient(135deg,#0e2e1a,#1d5e3a)">${icn('cart')}</span>Compra</button>`);
-  circ.push(`<button type="button" class="circ" data-sickopen="${w}|${ti}"><span style="background:linear-gradient(135deg,#3a140e,#7a2b1c);border-color:#FF6B5B">${icn('sick')}</span>${skT?'Enfermedad':'¿Malestar?'}</button>`);
+  if(skT)circ.push(`<button type="button" class="circ" data-sickopen="${w}|${ti}"><span style="background:linear-gradient(135deg,#3a140e,#7a2b1c);border-color:#FF6B5B">${icn('sick')}</span>${skT?'Enfermedad':'¿Malestar?'}</button>`);
   // Filas
   const week=DL.map((dl,i)=>{const d=OW.day[i],c=OW.cardio.includes(i),sk=sickAt(w,i),sj=p.pattern.indexOf(i),dn=sj>=0?sesDone(w,sj):null,t=d.str||d.sp.map(x=>x.name).join(' + ')||(c?'Cardio':'Descanso');
     return `<button type="button" class="pst${i===ti?' today':''}" data-tab="entreno" data-d="${i}" style="background:${sk?'linear-gradient(135deg,#3a140e,#7a2b1c)':d.str||d.sp.length||c?gradFor(t):'linear-gradient(135deg,#222,#333)'}">${sk?`<span class="b sk">${ENF().toUpperCase()}</span>`:i===ti?'<span class="b">HOY</span>':''}<small>${DSEM[i]}</small>${esc(t)}${dn&&!sk?`<span class="pb"><i style="width:${dn.n?Math.round(dn.d/dn.n*100):0}%"></i></span>`:''}</button>`}).join('');
@@ -4367,7 +4387,10 @@ function miPlanHTML(){const pr=curProf(),ss=loggedSessions(curC()).length,tg=top
     ${it(SV('<path d="M12 3v18M3 12h18"/>'),'#555','Base científica','De dónde sale cada parámetro','data-act="info"')}
     </div>
     ${marks.length?`<div class="nfrow"><h3>Tus mejores marcas <span>1RM estimado</span></h3><div class="nfcar">${marks.map(m=>`<button type="button" class="pst w" data-act="hist" data-ex="${esc(m.nm)}" style="background:${gradFor(m.nm)}"><small>${fmt(m.b,0)} kg</small>${esc(m.nm)}</button>`).join('')}</div></div>`:''}
-    <div class="nfrow"><h3>Ajustes</h3></div><div class="mpl">
+    <div class="nfrow"><h3>Actualizar tu plan</h3></div><div class="mpl">
+    ${(()=>{const a=sickActive(),tw=Math.min(5,Math.max(1,S.trW||1)),ic=SV('<path d="M10 13.5V5a2 2 0 1 1 4 0v8.5a4 4 0 1 1-4 0z"/><path d="M12 9v6"/>');
+      return a?`<button type="button" class="mpi mpsk on" data-sickopen="${a.on.w}|${a.on.d}"><span class="ic" style="background:#FF5A5F">${ic}</span><span class="tx"><b>${ENF()} · ${esc(a.lab)}</b><span>${esc(a.rng)} · toca para editar o quitar</span></span><em class="skpill">ACTIVO</em></button>`
+        :`<button type="button" class="mpi mpsk" data-sickopen="${tw}|${todayI()}"><span class="ic" style="background:#FF5A5F">${ic}</span><span class="tx"><b>Me encuentro mal</b><span>Pausa el entreno y adapta la dieta mientras te recuperas</span></span><em>›</em></button>`})()}
     ${it(SV('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),'#333','Perfil y medidas','Edad, sexo, provincia, peso y contornos','data-act="goto" data-id="perfil"')}
     ${it(SV(SVGI.tech),'#333','Entrenamiento y gimnasio','Días, nivel, marca de máquinas','data-act="goto" data-id="exp"')}
     ${it(SV('<path d="M12 21s-7-4.5-7-11a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 6.5-7 11-7 11z"/>'),'#333','Salud y lesión','Revisión de salud y condiciones médicas','data-act="goto" data-id="salud"')}
@@ -4390,8 +4413,8 @@ function rvHomeHTML(OW,w,r){const ti=todayI(),D=OW.day[ti],p=plan(),si=p.pattern
   const bal=`<div class="rvbal"><small>Hoy · ${esc(hoyDate().split(',')[0])}</small>${wd?`<div style="position:relative;width:210px;height:210px;display:grid;place-items:center"><svg viewBox="0 0 100 100" style="position:absolute;inset:0;transform:rotate(-90deg)" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="none" stroke="#1F1F24" stroke-width="4.5"/>${ring}</svg><div><div class="num">${fmt(wd.k)}<span>kcal</span></div><div class="rvmac"><span style="color:var(--mp)">P ${wd.p}</span><span style="color:var(--mc)">HC ${wd.c}</span><span style="color:var(--mf)">G ${wd.f}</span></div></div></div>`:`<div class="num">${sd?sd.d+'/'+sd.n:'—'}</div>`}
     <button type="button" class="rvpill" data-tab="entreno" data-d="${ti}">${esc(label)}</button></div>`;
   // acciones
-  const a1=skT?`<button type="button" class="rvact" data-sickwell="${w}|${ti}"><span>${rsv('plus')}</span>Ya estoy mejor</button>`:si>=0?`<button type="button" class="rvact" data-act="regday" data-w="${w}" data-s="${si}"><span>${rsv('play')}</span>${sd&&sd.d?'Seguir':'Empezar'}</button>`:`<button type="button" class="rvact" data-tab="entreno" data-d="${ti}"><span>${rsv('bar')}</span>Entreno</button>`;
-  const acts=`<div class="rvacts">${a1}<button type="button" class="rvact" data-tab="nutri" data-d="${ti}"><span>${rsv('menu')}</span>Menú</button>${nut(S)?`<button type="button" class="rvact" data-tab="compra"><span>${rsv('cart')}</span>Compra</button>`:''}<button type="button" class="rvact sk" data-sickopen="${w}|${ti}"><span>${rsv('sick')}</span>${skT?'Enfermedad':'Enfermo'}</button></div>`;
+  const a1=skT?`<button type="button" class="rvact" data-tab="entreno" data-d="${ti}"><span>${rsv('play')}</span>Qué hacer hoy</button>`:si>=0?`<button type="button" class="rvact" data-act="regday" data-w="${w}" data-s="${si}"><span>${rsv('play')}</span>${sd&&sd.d?'Seguir':'Empezar'}</button>`:`<button type="button" class="rvact" data-tab="entreno" data-d="${ti}"><span>${rsv('bar')}</span>Entreno</button>`;
+  const acts=`<div class="rvacts">${a1}<button type="button" class="rvact" data-tab="nutri" data-d="${ti}"><span>${rsv('menu')}</span>Menú</button>${nut(S)?`<button type="button" class="rvact" data-tab="compra"><span>${rsv('cart')}</span>Compra</button>`:''}</div>`;
   // promo
   let promo='';if(!S.promoOff){const pr=REG.sim?['📈','Simulación de 10 semanas','Mira cómo vas tras dos bloques','data-act="progreso"']:!Object.keys(REG.log||{}).length?['🔮','¿Cómo irás en 10 semanas?','Simula dos bloques de uso','data-act="seed"']:S.lesion==='Sí'?['🦵','Readaptación de '+(ZONAG[S.zona]||[S.zona||'lesión'])[0],'3 ejercicios antes de cada sesión','data-tab="entreno"']:null;
     if(pr)promo=`<div class="rvpromo"><button type="button" class="x" data-act="promox" aria-label="Ocultar">✕</button><span class="art">${pr[0]}</span><button type="button" ${pr[3]} style="all:unset;cursor:pointer;flex:1"><b>${esc(pr[1])}</b><span>${esc(pr[2])}</span></button></div>`;}
@@ -4533,7 +4556,7 @@ const HQI='<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.
 const TSTEPS=[['.rvbal','Tu día de un vistazo','Las calorías y macros de hoy, y lo que te toca entrenar. Toca el anillo para ver el entreno del día.'],
  ['.qk,.rvacts','Registra en un toque','Aquí sale tu siguiente serie. La primera vez anotas el peso; después basta con «Serie hecha» y la app calcula la carga de la próxima.'],
  ['.bnav','Todo en 5 pestañas','Entreno, Nutrición, Compra y Mi plan. Lo que cambias en una se actualiza en las demás.'],
- ['.rvact.sk','¿Un mal día?','Si estás enfermo, márcalo: el plan y la dieta se adaptan y no rompe tu racha.'],
+ ['.bnav [data-tab=miplan],[data-tab=miplan]','¿Un mal día?','En Mi plan, toca «Me encuentro mal»: el entreno se pausa, la dieta se adapta y no rompe tu racha.'],
  ['.rvhelp','Ayuda siempre aquí','Este botón abre la ayuda: guías, preguntas frecuentes y este tutorial cuando quieras repetirlo.']];
 function tourOffer(){document.querySelectorAll('.tour,.tofr').forEach(x=>x.remove());const o=document.createElement('div');o.className='tofr';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label','Tutorial');
   o.innerHTML=`<div class="tofb"><span class="tofi">${qsvg('muscle')}</span><h2>Tu plan está listo.<br>¿Te enseñamos la app?</h2><p>Cinco toques, unos 20 segundos. Puedes repetirlo cuando quieras desde el botón de ayuda.</p><button type="button" class="qcta" data-t="go">Ver el tutorial</button><button type="button" class="link" data-t="no">Ahora no</button></div>`;
@@ -4544,7 +4567,7 @@ function tourShow(i){TOUR=i;let o=document.querySelector('.tour');if(!o){o=docum
   const st=TSTEPS[i],el=st[0].split(',').map(q=>document.querySelector(q)).find(x=>x&&x.getBoundingClientRect().width);if(!el){TOUR<TSTEPS.length-1?tourShow(i+1):tourEnd();return}
   const fixedEl=getComputedStyle(el).position==='fixed'||el.closest('.bnav');if(!fixedEl)el.scrollIntoView({block:'center',behavior:'instant'});
   requestAnimationFrame(()=>{const r=el.getBoundingClientRect(),pad=8,sp=o.querySelector('.tspot'),tip=o.querySelector('.ttip');
-    Object.assign(sp.style,{left:(r.left-pad)+'px',top:(r.top-pad)+'px',width:(r.width+pad*2)+'px',height:(r.height+pad*2)+'px',borderRadius:st[0]==='.rvhelp'||st[0]==='.rvact.sk'?'999px':st[0]==='.bnav'?'18px':'24px'});
+    Object.assign(sp.style,{left:(r.left-pad)+'px',top:(r.top-pad)+'px',width:(r.width+pad*2)+'px',height:(r.height+pad*2)+'px',borderRadius:st[0]==='.rvhelp'||st[0].startsWith('.bnav [data')?'16px':st[0]==='.bnav'?'18px':'24px'});
     tip.querySelector('.ttn').textContent=`Paso ${i+1} de ${TSTEPS.length}`;tip.querySelector('h3').textContent=st[1];tip.querySelector('p').textContent=st[2];
     tip.querySelector('.tdots').innerHTML=TSTEPS.map((_,j)=>`<i class="${j===i?'on':''}"></i>`).join('');tip.querySelector('.tnext').textContent=i===TSTEPS.length-1?'¡Entendido!':'Siguiente';
     const W=innerWidth,H=innerHeight,tw=Math.min(380,W-32);tip.style.width=tw+'px';const th=tip.offsetHeight;
@@ -4562,7 +4585,7 @@ const HFAQ=[['series','¿Qué es el RIR?','Las repeticiones que te quedan «en r
  ['plato','No me gusta un plato del menú','En Nutrición, toca «Opciones» en ese plato y elige otro que cuadre con tus macros, o abre la receta para ver cómo prepararlo.'],
  ['plato','¿Puedo cambiar mis macros?','Sí. En Nutrición, despliega los macros y ajusta la proteína o las grasas en gramos por kilo. Puedes volver a la base científica cuando quieras.'],
  ['compra','¿De dónde sale la lista de la compra?','De tu menú de la semana, en formatos reales de supermercado (bandejas, briks, botes). Puedes compararla entre los supermercados de tu provincia.'],
- ['enfermo','¿Qué pasa si me pongo enfermo?','Márcalo con el botón Enfermo. El entreno de esos días se pausa, la dieta se adapta a tus síntomas y la vuelta es progresiva. No rompe tu racha.'],
+ ['enfermo','¿Qué pasa si me pongo enfermo?','Ve a Mi plan y toca «Me encuentro mal». Mientras esté activo verás un aviso arriba en Inicio, Entreno y Nutrición. El entreno de esos días se pausa, la dieta se adapta a tus síntomas y la vuelta es progresiva. No rompe tu racha.'],
  ['racha','¿Cómo funciona la racha?','Suma cada día que registras algo. Los días de descanso de tu plan y los de enfermedad no la rompen.'],
  ['pasos','¿Cómo veo mis pasos?','Toca el widget «Pasos de hoy» en Inicio. Puedes anotarlos a mano o, en iPhone, traerlos de Salud con un atajo: las instrucciones están en esa misma ficha.'],
  ['perfil','¿Puedo usar la app con otra persona?','Sí. Toca tu avatar arriba y añade un perfil: cada persona tiene su propio plan, menú y registro. Desde «Gestionar perfiles» puedes cambiarles el nombre o borrarlos.'],
@@ -4622,7 +4645,7 @@ function hoyHTML(OW,w,r){const ti=todayI(),D=OW.day[ti],p=plan(),si=p.pattern.in
   else if(!Object.keys(REG.log||{}).length)simB=`<button type="button" class="hcard wide hsimq" data-act="seed"><span class="hwl"><small>Vista previa</small><b>¿Cómo irás en 10 semanas?</b><span>Simula dos bloques de uso: cargas, peso, cardio y ajustes de la app</span></span><em>Simular</em></button>`;
   const RING=(segs,r,sw)=>{const C=2*Math.PI*r;let off=0;return `<circle cx="50" cy="50" r="${r}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="${sw}"/>`+segs.map(([v,col])=>{const len=Math.max(0,v*C-3),el=`<circle cx="50" cy="50" r="${r}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${len.toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}"/>`;off+=v*C;return el}).join('')};
   let hero='';const QI={reg:'<path d="M12 5v14M5 12h14"/>',menu:'<path d="M3 11h18a9 9 0 0 1-18 0Z"/><path d="M12 11V6c0-1.5 1-2.5 2.5-3"/>',cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M2.5 4h2.3l2.4 11.2h11.2L20.5 7H6"/>',sick:'<path d="M10 13.5V5a2 2 0 1 1 4 0v8.5a4 4 0 1 1-4 0z"/><path d="M12 9v6"/>'};
-  const qa=`<div class="qacts">${si>=0&&!skT?`<button type="button" class="qact" data-act="regday" data-w="${w}" data-s="${si}"><span><svg viewBox="0 0 24 24">${QI.reg}</svg></span>Registrar</button>`:`<button type="button" class="qact" data-tab="seg"><span><svg viewBox="0 0 24 24">${QI.reg}</svg></span>Registro</button>`}<button type="button" class="qact" data-tab="nutri" data-d="${ti}"><span><svg viewBox="0 0 24 24">${QI.menu}</svg></span>Menú</button><button type="button" class="qact" data-tab="compra"><span><svg viewBox="0 0 24 24">${QI.cart}</svg></span>Compra</button><button type="button" class="qact sk" data-sickopen="${w}|${ti}"><span><svg viewBox="0 0 24 24">${QI.sick}</svg></span>${skT?'Enfermedad':'Enfermo'}</button></div>`;
+  const qa=`<div class="qacts">${si>=0&&!skT?`<button type="button" class="qact" data-act="regday" data-w="${w}" data-s="${si}"><span><svg viewBox="0 0 24 24">${QI.reg}</svg></span>Registrar</button>`:`<button type="button" class="qact" data-tab="seg"><span><svg viewBox="0 0 24 24">${QI.reg}</svg></span>Registro</button>`}<button type="button" class="qact" data-tab="nutri" data-d="${ti}"><span><svg viewBox="0 0 24 24">${QI.menu}</svg></span>Menú</button><button type="button" class="qact" data-tab="compra"><span><svg viewBox="0 0 24 24">${QI.cart}</svg></span>Compra</button></div>`;
   if(np){const wd=nutWeek(np,w)[ti],tot=wd.p*4+wd.c*4+wd.f*9||1;
     hero=`<div class="hero"><div class="hring"><svg viewBox="0 0 100 100">${RING([[wd.p*4/tot,'#3DA2FF'],[wd.c*4/tot,'#C6FF3D'],[wd.f*9/tot,'#FF5A3C']],42,9)}</svg><div class="in"><small>${esc(hoyDate().split(',')[0].replace(/^./,c=>c.toUpperCase()))}${skT?' · '+ENF().toLowerCase():''}</small><b>${fmt(wd.k)}</b><small>kcal hoy</small></div></div>
       <div class="hleg"><div><b style="color:#3DA2FF">${wd.p} g</b><small>Proteína</small></div><div><b style="color:#C6FF3D">${wd.c} g</b><small>Hidratos</small></div><div><b style="color:#FF5A3C">${wd.f} g</b><small>Grasas</small></div></div>${qa}</div>`;}
@@ -4706,11 +4729,11 @@ function summary(){
   h+=`<details><summary>Datos recogidos (JSON para desarrollo)</summary><div style="padding:0 14px 10px"><button class="ghostbtn" data-act="copy">Copiar JSON</button></div><pre id="json">${esc(JSON.stringify(S,null,2))}</pre></details>`;
   h+=`<p class="note">Prototipo. Las fórmulas (Mifflin-St Jeor, US Navy) y las reglas son de ejemplo para validar el flujo. No sustituye la valoración de un profesional sanitario.</p>`;
   const P_end=h,tab=S.tab||'hoy';
-  if(tab==='entreno')return P_tr+P_inj+P_reg;
-  if(tab==='nutri')return P_nu;
+  if(tab==='entreno')return sickBarHTML()+P_tr+P_inj+P_reg;
+  if(tab==='nutri')return sickBarHTML()+P_nu;
   if(tab==='compra')return shopHTML();
   if(tab==='miplan')return miPlanHTML();
-  return rvHomeHTML(OW,twk,r)+P_al.replace(/^<p class="intro">.*?<\/p>/,'')+`<details class="hsec"><summary>Punto de partida<span>peso, IMC, % grasa${showE?', gasto diario':''}</span></summary><div class="hsecb">${P_st}</div></details>`+P_end;
+  return sickBarHTML()+rvHomeHTML(OW,twk,r)+P_al.replace(/^<p class="intro">.*?<\/p>/,'')+`<details class="hsec"><summary>Punto de partida<span>peso, IMC, % grasa${showE?', gasto diario':''}</span></summary><div class="hsecb">${P_st}</div></details>`+P_end;
 }
 stepsFromUrl();
 render();
