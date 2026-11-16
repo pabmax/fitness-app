@@ -1287,6 +1287,26 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 .skpill{font:700 10.5px var(--f-ui,inherit)!important;font-style:normal;letter-spacing:.06em;background:#FF5A5F;color:#fff!important;border-radius:99px;padding:3px 8px}
 .nfbadge.sk{background:#FF5A5F;color:#fff}
 .pst .b.sk{background:#FF5A5F;color:#fff}
+
+/* ---------- Idioma ---------- */
+.flag{width:20px;height:14px;border-radius:3px;display:block;flex:none}
+.rvlang{flex:none;height:36px;border-radius:99px;background:#1A1A1F;border:1px solid #2C2C33;display:inline-flex;align-items:center;gap:6px;padding:0 10px 0 8px;font:700 12.5px var(--f-ui,inherit);color:#F2F2F5;cursor:pointer}
+.rvlang:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.qwlang{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:16px;z-index:3}
+.lgsh{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.lgbg{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.lgb{position:relative;background:#17171C;color:#F2F2F5;border-radius:24px 24px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));width:100%;max-width:480px;display:grid;gap:10px}
+@media (min-width:700px){.lgsh{align-items:center}.lgb{border-radius:24px}}
+.lggrab{width:40px;height:4px;border-radius:9px;background:#444;justify-self:center}
+.lgb>b{font-size:18px}
+.lgopts{display:grid;gap:8px}
+.lgopt{display:grid;grid-template-columns:30px minmax(0,1fr) 22px;gap:12px;align-items:center;background:#1F1F25;border:1.5px solid transparent;border-radius:14px;padding:12px;color:#F2F2F5;font:600 15px var(--f-ui,inherit);text-align:left;cursor:pointer}
+.lgopt .flag{width:30px;height:20px}.lgopt small{display:block;font-weight:400;font-size:12.5px;color:#9A9AA6}
+.lgopt i{width:22px;height:22px;border-radius:50%;border:2px solid #555}
+.lgopt[aria-checked="true"]{border-color:#7C5CFF;background:rgba(124,92,255,.12)}.lgopt[aria-checked="true"] i{border-color:#7C5CFF;background:#7C5CFF;box-shadow:inset 0 0 0 4px #1F1F25}
+.lgopt:focus-visible,.lgcn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.lgnote{margin:0;font-size:12.5px;color:#9A9AA6;line-height:1.45}
+.lgcn{font:600 14px var(--f-ui,inherit);background:transparent;color:#9A9AA6;border:0;padding:8px;cursor:pointer}
 /* ---------- Versión web 16:9 ---------- */
 @media (min-width:1200px){
   body.desk{padding-left:calc(248px + 48px);padding-right:48px}
@@ -1319,6 +1339,48 @@ details.pcmp .pcprov{display:grid;gap:6px}.pcprov>span{font-size:12px;color:var(
 </style>
 
 <div class="wrap" id="app"></div>
+<script id="i18n">
+const EN={};
+const EN_RX=[];
+/* ---------- Idioma ES/EN: capa de traducción sobre el DOM ----------
+   La app se escribe en español. En inglés, cada texto que aparece en pantalla se busca en EN
+   (texto exacto), luego con los números como {0},{1}…, luego en reglas EN_RX y, si lleva " · ",
+   por partes. Lo que no está traducido se queda en español y se apunta en I18N_MISS. */
+let LANG='es';try{const v=localStorage.getItem('onb-fitness-lang');if(v==='es'||v==='en')LANG=v}catch(e){}
+document.documentElement.lang=LANG;
+const LOC=()=>LANG==='en'?'en-GB':'es-ES';
+const I18N_MISS=new Set();
+const numEN=n=>/^\d{1,3}(\.\d{3})+$/.test(n)?n.replace(/\./g,','):/^\d+,\d+$/.test(n)?n.replace(',','.'):n;
+function trS(t,deep){if(EN[t]!=null)return EN[t];
+  const nums=[],k=t.replace(/\d+(?:[.,]\d+)*/g,m=>{nums.push(m);return '{'+(nums.length-1)+'}'});
+  if(nums.length&&EN[k]!=null)return EN[k].replace(/\{(\d+)\}/g,(_,i)=>numEN(nums[+i]));
+  for(const [rx,f] of EN_RX){const m=t.match(rx);if(m){const r=typeof f==='function'?f(...m):t.replace(rx,f);if(r!=null)return r}}
+  if(!deep){for(const sep of [' · ',' — ',': ',' + ',', ']){if(t.includes(sep)){const ps=t.split(sep),tp=ps.map(p=>{const q=p.trim();if(!q||!/[A-Za-zÁ-ú]/.test(q))return p;const r=trS(q,1);return r==null?null:p.replace(q,r)});if(tp.every(x=>x!=null))return tp.join(sep)}}}
+  const end=t.match(/^(.*?)([.:!?…]+)$/);if(end&&end[1]&&EN[end[1]]!=null)return EN[end[1]]+end[2];
+  if(t[0]!==t[0].toUpperCase()){const up=t[0].toUpperCase()+t.slice(1);if(EN[up]!=null){const r=EN[up];return r[0].toLowerCase()+r.slice(1)}}
+  return null}
+const I18N_SKIP=new Set(['SCRIPT','STYLE','TEXTAREA','CODE','PRE']);
+function trText(n){const raw=n.nodeValue,t=raw.trim();if(!t)return;if(!/[A-Za-zÁ-úñ¿¡]/.test(t)){if(/\d[.,]\d/.test(t)){const r=t.replace(/\d+(?:[.,]\d+)*/g,numEN);if(r!==t)n.nodeValue=raw.replace(t,r)}return}const p=n.parentNode;if(!p||I18N_SKIP.has(p.nodeName)||(p.closest&&p.closest('[data-notr]')))return;
+  const r=trS(t);if(r!=null){if(r!==t)n.nodeValue=raw.replace(t,r)}else if(/[a-záéíóúñ]/i.test(t))I18N_MISS.add(t)}
+function trAttr(el){for(const a of ['placeholder','aria-label','title','alt']){const v=el.getAttribute&&el.getAttribute(a);if(v&&/[A-Za-z]/.test(v)){const r=trS(v.trim());if(r!=null)el.setAttribute(a,r);else I18N_MISS.add(v.trim())}}}
+function trNode(root){if(LANG!=='en'||!root)return;if(root.nodeType===3){trText(root);return}if(root.nodeType!==1||I18N_SKIP.has(root.nodeName))return;
+  trAttr(root);const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;const L=[];while(n=w.nextNode())L.push(n);L.forEach(trText);
+  root.querySelectorAll('[placeholder],[aria-label],[title],[alt]').forEach(trAttr)}
+new MutationObserver(ms=>{if(LANG!=='en')return;for(const m of ms)m.addedNodes.forEach(trNode)}).observe(document.getElementById('app').parentNode,{childList:true,subtree:true});
+const FLAGS={es:'<svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/></svg>',
+  en:'<svg class="flag" viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0 0l60 30M60 0L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30M60 0L0 30" stroke="#C8102E" stroke-width="2.4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></svg>'};
+const langBtn=cls=>`<button type="button" class="${cls||'rvlang'}" data-act="lang" aria-label="${LANG==='en'?'Language: English':'Idioma: español'}" data-notr>${FLAGS[LANG]}<span>${LANG.toUpperCase()}</span></button>`;
+function langSheet(){document.querySelectorAll('.lgsh').forEach(x=>x.remove());const o=document.createElement('div');o.className='lgsh';o.setAttribute('data-notr','');
+  o.innerHTML=`<div class="lgbg" data-lg="x"></div><div class="lgb" role="dialog" aria-modal="true" aria-label="Idioma · Language"><div class="lggrab"></div><b>Idioma · Language</b>
+   <div role="radiogroup" class="lgopts">${[['es','Español','Español de España'],['en','English','English (UK)']].map(([k,n,s])=>`<button type="button" class="lgopt" role="radio" aria-checked="${k===LANG}" data-lg="${k}">${FLAGS[k]}<span>${n}<small>${s}</small></span><i></i></button>`).join('')}</div>
+   <p class="lgnote">${LANG==='en'?'Translation in progress: some sections may still appear in Spanish.':'La traducción al inglés se está completando: algunas secciones pueden salir aún en español.'}</p>
+   <button type="button" class="lgcn" data-lg="x">${LANG==='en'?'Cancel':'Cancelar'}</button></div>`;
+  document.body.appendChild(o);const f=o.querySelector('[aria-checked="true"]');f&&f.focus();
+  const close=()=>{o.remove();const b=document.querySelector('[data-act="lang"]');b&&b.focus()};
+  o.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+  o.addEventListener('click',e=>{const b=e.target.closest('[data-lg]');if(!b)return;const v=b.dataset.lg;if(v==='x'||v===LANG){close();return}setLang(v);close();toast(v==='en'?'Language: English':'Idioma: español')})}
+function setLang(v){LANG=v;try{localStorage.setItem('onb-fitness-lang',v)}catch(e){}document.documentElement.lang=v;render(true);if(v==='en')trNode(document.body)}
+</script>
 
 <script>
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(SHEET||INFO||RSHEET||SKS||SRCH)){SHEET=null;INFO=false;RSHEET=null;SKS=null;SRCH=null;RTIM={};render(true)}});
@@ -1668,7 +1730,7 @@ function previsionHTML(){const f=forecast(),k=Math.min(1,.55+f.d*.07),pts=Array.
      <circle cx="${pts[10][0]}" cy="${pts[10][1]}" r="6" fill="#fff" stroke="#7B6CFF" stroke-width="3"/></svg><div class="qlg"><span>Hoy</span><span>Semana 5</span><span>Semana 10</span></div></div>
    <div class="qfeed"><span class="qfi">${qsvg(QCARD[f.o]?QCARD[f.o][0]:'up')}</span><p><b>${esc(f.o)}:</b> ${esc(f.txt)}. Es lo habitual con tu nivel (${esc((S.nivel||'intermedio').toLowerCase())}) si cumples el plan; cada semana lo ajustamos con lo que registres.</p></div>`}
 /* Bienvenida, creando el plan y plan listo */
-function welcomeHTML(){return `<div class="qwelc"><canvas id="qcv" aria-hidden="true"></canvas><div class="qwi">
+function welcomeHTML(){return `<div class="qwelc"><canvas id="qcv" aria-hidden="true"></canvas>${langBtn('rvlang qwlang')}<div class="qwi">
   <div class="qproof"><span class="qavs"><i style="background:#5B8CFF">${qsvg('muscle')}</i><i style="background:#3BB273">${qsvg('seed')}</i><i style="background:#F2994A">${qsvg('heart')}</i></span>Gimnasio, parque de barras o casa</div>
   <h1 class="qwt">Entrena con<br><em>un plan que</em><br>es tuyo.</h1><p>Unas preguntas rápidas y tendrás tu entreno, tu menú y tu lista de la compra. Puedes cambiar cualquier respuesta después.</p>
   <button type="button" class="qcta" data-act="start">Empezar</button><div class="qwl"><button type="button" class="link" data-act="demo">Ver con un ejemplo</button>${PROF.list.length>1?'<button type="button" class="link" data-act="pickprof">Cambiar de perfil</button>':''}</div></div></div>`}
@@ -1891,6 +1953,7 @@ function act(a,el){
   else if(a==='rhsave'){rhSave();return}
   else if(a==='closerhfig'){RHFIG=null;render(true);return}
   else if(a==='newinj'){S.lesion='Sí';S.rhSince=new Date().toISOString().slice(0,10);S.rhStart=S.rhSince;curId='lesion';curQ=0;QDIR=1;EDIT={snap:JSON.stringify({...S,lesion:'No'}),id:'lesion'};render();return}
+  else if(a==='lang'){langSheet();return}
   else if(a==='help'){HELP={q:''};QMENU=false;render(true);return}
   else if(a==='closehelp'){HELP=null;render(true);return}
   else if(a==='tour'){HELP=null;QMENU=false;tourStart();return}
@@ -3495,7 +3558,7 @@ function rehabPlanHTML(compact){if(S.lesion!=='Sí')return '';const k=rhIdx(),P=
    <div class="rhprog"><b>Cómo progresar</b><p>${esc(RHPROG[P[0]])}</p></div>
    <div class="rhsem"><span><i class="g"></i>0–3: sigue y progresa</span><span><i class="a"></i>4–5: mantén la dosis</span><span><i class="r"></i>6+ o peor al día siguiente: baja un paso</span></div>
    <div class="rhcrit"><b>${k<3?'Para pasar a la fase '+(k+2):'Para darte de alta'}</b><p>${esc(nextTest)}</p></div>
-   <div class="rhchk"><b>Revisión semanal</b>${last?`<span class="rhlast">Última: ${esc(last.res)} · ${new Date(last.t).toLocaleDateString('es-ES',{day:'numeric',month:'short'})}</span>`:''}
+   <div class="rhchk"><b>Revisión semanal</b>${last?`<span class="rhlast">Última: ${esc(last.res)} · ${new Date(last.t).toLocaleDateString(LOC(),{day:'numeric',month:'short'})}</span>`:''}
     ${g('Dolor durante los ejercicios','d',[['0','0–3','g'],['4','4–5','a'],['6','6 o más','r']])}
     ${g('A la mañana siguiente','m',[['0','Igual o mejor','g'],['1','Peor','r']])}
     <label class="rhtest"><input type="checkbox" data-rhtest ${C.t?'checked':''}> <span>${k<3?'Cumplo el criterio para pasar de fase':'Cumplo el criterio de alta'}</span></label>
@@ -4228,7 +4291,7 @@ Responde solo con JSON: {"claves":["3 claves de 2-5 palabras"],"preparacion":[".
 
 /* ---------- Panel Hoy y barra de navegación inferior ---------- */
 const todayI=()=>(new Date().getDay()+6)%7;
-function hoyDate(){return new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})}
+function hoyDate(){return new Date().toLocaleDateString(LOC(),{weekday:'long',day:'numeric',month:'long'})}
 const NAVI={hoy:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/>',entreno:'<path d="M2 12h20"/><path d="M5 8v8M8 6v12M16 6v12M19 8v8"/>',nutri:'<path d="M3 11h18a9 9 0 0 1-18 0Z"/><path d="M12 11V6c0-1.5 1-2.5 2.5-3"/>',seg:'<path d="M4 20V11M10 20V5M16 20v-6M3 20h18"/>',miplan:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.5a6.5 6.5 0 0 1 11 0"/>',compra:'<circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M2.5 4h2.3l2.4 11.2h11.2L20.5 7H6"/>'};
 
 /* ---------- Lista de la compra ----------
@@ -4245,7 +4308,7 @@ const PRICE_CAT={'Frutas':2.3,'Verduras':2.6,'Tubérculos':1.2,'Carnes':8,'Embut
 const PRICE={'Pechuga de pollo':7.5,'Muslo de pollo sin piel':5,'Pechuga de pavo':9,'Pechuga de pavo en lonchas':12,'Ternera magra':14,'Carne picada de ternera 5%':10,'Hamburguesa de pollo':7,'Solomillo de cerdo':9,'Lomo de cerdo':7,'Jamón cocido extra':10,'Lomo embuchado':20,'Jamón serrano':16,'Merluza':10,'Bacalao fresco':12,'Salmón':13,'Caballa':7,'Dorada':9,'Atún en lata al natural':13,'Sardinas en lata en aceite':11,'Gambas o langostinos':12,'Calamar':9,'Huevos':3.3,'Claras de huevo pasteurizadas':3.5,'Leche semidesnatada':.95,'Leche desnatada':.95,'Leche sin lactosa semidesnatada':1.15,'Bebida de soja sin azúcar':1.4,'Yogur natural':1.9,'Yogur natural desnatado':2,'Yogur proteico tipo skyr':4.5,'Yogur griego 0%':4,'Queso fresco batido 0%':3,'Queso fresco light':7,'Arroz blanco':1.3,'Arroz integral':2,'Pasta':1.5,'Pasta integral':2,'Quinoa':6,'Copos de avena':1.8,'Copos de avena sin gluten':4,'Muesli sin azúcar':4,'Pan blanco':2.5,'Pan integral':3,'Pan de centeno':3.5,'Pan sin gluten':8,'Tortitas de arroz':7,'Tortilla de trigo (wrap)':5,'Patata':1.1,'Boniato':2,'Lentejas cocidas':2,'Garbanzos cocidos':2,'Guisantes cocidos':3,'Tofu firme':8,'Tempeh':14,'Seitán':12,'Hummus':6,'Edamame':8,'Verduras para salteado (congeladas)':2.5,'Ensalada mixta':5,'Tomate':2.2,'Lechuga':2,'Espinacas':4,'Brócoli':3,'Calabacín':2,'Pimiento rojo':3,'Cebolla':1.4,'Zanahoria':1.1,'Calabaza':1.8,'Champiñones':4,'Judías verdes':4,'Berenjena':2.4,'Plátano':2,'Manzana':2.2,'Naranja':1.8,'Kiwi':3.5,'Fresas':4,'Arándanos':12,'Mango':3.5,'Pera':2.3,'Mandarina':2.2,'Aguacate':5,'Dátiles':7,'Nueces':12,'Almendras':13,'Pipas de girasol peladas':8,'Semillas de chía':10,'Crema de cacahuete':9,'Aceite de oliva virgen extra':7,'Miel':8,'Mermelada':4,'Tomate frito':2.5,'Salsa de soja':6,'Té o infusión':.3,'Zumo de naranja natural':1.8};
 function shopCost(L){return L.items.reduce((t,o)=>{const p=PRICE[o.name]??PRICE[o.fd.n]??PRICE_CAT[o.fd.cat]??3,pk=packOf(o);return t+(pk?pk.g:o.g)/1000*p},0);}
 function chainsFor(prov){const r=PROVS[prov];if(!r)return [];return [...new Set([...CHAIN_NAT,...(CHAIN_REG[r]||[])])].filter(c=>OCUIDX[c]);}
-const eur=x=>x.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const eur=x=>x.toLocaleString(LOC(),{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 let PCOPEN=false;
 document.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('injx'))INJOPEN=e.target.open;if(e.target.classList&&e.target.classList.contains('pcmp'))PCOPEN=e.target.open;if(e.target.classList&&e.target.classList.contains('pinfo')&&!e.target.closest('#rehabsec'))PINFO=e.target.open},true);
 function priceCmpHTML(L){const sel=`<select class="sel" data-k="provincia" aria-label="Tu provincia"><option value="">Elige tu provincia…</option>${Object.keys(PROVS).sort((a,b)=>a.localeCompare(b,'es')).map(p=>`<option${p===S.provincia?' selected':''}>${esc(p)}</option>`).join('')}</select>`;
@@ -4380,7 +4443,7 @@ function miPlanHTML(){const pr=curProf(),ss=loggedSessions(curC()).length,tg=top
   const marks=[...new Set(cycle().flatMap(x=>x.ex.map(e=>e.name)))].map(nm=>{const pts=exSeries(nm).filter(p=>!p.bw);return pts.length?{nm,b:Math.max(...pts.map(p=>p.y))}:null}).filter(Boolean).sort((a,b)=>b.b-a.b).slice(0,6);
   return `<div class="mp-av"><button type="button" data-act="pickprof" aria-label="Cambiar de perfil" style="background:${profCol(PROF.cur)}">${esc((pr.name||'?')[0].toUpperCase())}</button><b>${esc(pr.name)} ⌄</b></div>
     <div class="mpl">
-    ${it(SV('<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/>'),'#E50914','Avisos',`Revisión de medidas el ${re.toLocaleDateString('es-ES',{day:'numeric',month:'long'})}${conds().length?' · '+conds().length+' ajuste'+(conds().length>1?'s':'')+' de salud':''}`,'data-tab="hoy"')}
+    ${it(SV('<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/>'),'#E50914','Avisos',`Revisión de medidas el ${re.toLocaleDateString(LOC(),{day:'numeric',month:'long'})}${conds().length?' · '+conds().length+' ajuste'+(conds().length>1?'s':'')+' de salud':''}`,'data-tab="hoy"')}
     ${it(SV(SVGI.prog),'#2D7FF9','Mi progreso',tg?`Mejor avance: ${esc(tg.nm.toLowerCase())} +${fmt(tg.g*100,0)} %`:'Aún sin registros','data-act="progreso"')}
     ${it(SV('<path d="M9 5h10M9 12h10M9 19h10M5 5h.01M5 12h.01M5 19h.01"/>'),'#46A35E','Registro del ciclo',`${ss} sesiones registradas · bloque ${curC()}`,'data-act="registro"')}
     ${it(SV(HQI),'#5B45E0','Ayuda','Tutorial, guías y preguntas frecuentes','data-act="help"')}
@@ -4403,7 +4466,7 @@ function miPlanHTML(){const pr=curProf(),ss=loggedSessions(curC()).length,tg=top
 /* ---------- Estilo app bancaria móvil: barra superior, inicio con cifra, acciones, tarjetas y widgets ---------- */
 const RVI={chart:'<path d="M4 20V11M10 20V5M16 20v-6M3 20h18"/>',cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M2.5 4h2.3l2.4 11.2h11.2L20.5 7H6"/>',search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',play:'<path d="M7 4l13 8-13 8z"/>',plus:'<path d="M12 5v14M5 12h14"/>',menu:'<path d="M3 11h18a9 9 0 0 1-18 0Z"/><path d="M12 11V6c0-1.5 1-2.5 2.5-3"/>',sick:'<path d="M10 13.5V5a2 2 0 1 1 4 0v8.5a4 4 0 1 1-4 0z"/><path d="M12 9v6"/>',bar:'<path d="M2 12h20"/><path d="M5 8v8M8 6v12M16 6v12M19 8v8"/>',run:'<circle cx="14" cy="4" r="2"/><path d="M8 21l3-6 3 2v4M6 12l3-4 5 1 3 4"/>',bed:'<path d="M3 18v-8M21 18v-5a3 3 0 0 0-3-3H10v8M3 14h18"/>'};
 const rsv=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${RVI[k]}</svg>`;
-function rvTop(){return `<div class="rvtop"><button type="button" class="rvav" data-act="pickprof" aria-label="Cambiar de perfil" style="background:${profCol(PROF.cur)}">${esc((curProf().name||'?')[0].toUpperCase())}</button><button type="button" class="rvsrch" data-act="search">${rsv('search')}Buscar</button>${streakChip()}<button type="button" class="rvic" data-act="progreso" aria-label="Mi progreso">${rsv('chart')}</button>${nut(S)?`<button type="button" class="rvic" data-tab="compra" aria-label="Lista de la compra">${rsv('cart')}</button>`:''}<button type="button" class="rvic rvhelp" data-act="help" aria-label="Ayuda"><svg viewBox="0 0 24 24">${HQI}</svg></button></div>`;}
+function rvTop(){return `<div class="rvtop"><button type="button" class="rvav" data-act="pickprof" aria-label="Cambiar de perfil" style="background:${profCol(PROF.cur)}">${esc((curProf().name||'?')[0].toUpperCase())}</button><button type="button" class="rvsrch" data-act="search">${rsv('search')}Buscar</button>${streakChip()}<button type="button" class="rvic" data-act="progreso" aria-label="Mi progreso">${rsv('chart')}</button>${langBtn()}<button type="button" class="rvic rvhelp" data-act="help" aria-label="Ayuda"><svg viewBox="0 0 24 24">${HQI}</svg></button></div>`;}
 function spark(vals,col){if(!vals||vals.length<2)return '';const lo=Math.min(...vals),hi=Math.max(...vals),r=hi-lo||1;return `<svg class="sp" viewBox="0 0 100 38" preserveAspectRatio="none" aria-hidden="true"><polyline points="${vals.map((v,i)=>(i/(vals.length-1)*100).toFixed(1)+','+(34-(v-lo)/r*30).toFixed(1)).join(' ')}" fill="none" stroke="${col}" stroke-width="2.2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>`}
 function rvHomeHTML(OW,w,r){const ti=todayI(),D=OW.day[ti],p=plan(),si=p.pattern.indexOf(ti),car=OW.cardio.includes(ti),lvl=dayLevel(ti),skT=sickAt(w,ti);
   const np=nut(S)&&!r.habitsMode?nutPlan():null,sd=si>=0?sesDone(w,si):null,wd=np?nutWeek(np,w)[ti]:null;
@@ -4436,7 +4499,7 @@ function rvHomeHTML(OW,w,r){const ti=todayI(),D=OW.day[ti],p=plan(),si=p.pattern
     `<button type="button" class="rvwt" data-act="progreso"><small>Fuerza</small><b>${tg?'+'+fmt(tg.g*100,0)+' %':'—'}</b><em style="color:${tg?'#2BD46A':'var(--muted)'}">${tg?'▲ '+esc(tg.nm.toLowerCase()):'aún sin registros'}</em>${tgPts?spark(tgPts,'#2BD46A'):''}</button>`,
     REG.sim?`<button type="button" class="rvwt" data-act="progreso"><small>Peso · media</small><b>${fmt(REG.sim.peso.slice(-3).reduce((a,b)=>a+b,0)/3,1)} kg</b><em style="color:var(--muted)">${fmt(REG.sim.peso.slice(-3).reduce((a,b)=>a+b,0)/3-REG.sim.peso[0],1)} kg desde el inicio</em>${spark(REG.sim.peso,'#7B6CFF')}</button>`:`<button type="button" class="rvwt" data-tab="nutri"><small>Fase</small><b style="font-size:19px">${esc(nut(S)?curPhase().replace(/ \(.*\)/,''):S.objetivo||'—')}</b><em style="color:var(--muted)">${np?fmt(np.avg)+' kcal de media':'objetivo'}</em></button>`,
     shopC?`<button type="button" class="rvwt" data-tab="compra"><small>Compra de la semana</small><b>${eur(shopC.v)}</b><em style="color:var(--muted)">en ${esc(shopC.c)}</em><span class="bar"><i style="width:${Math.min(100,shopC.v/(S.shopBudget||70)*100).toFixed(0)}%;background:${shopC.v>(S.shopBudget||70)?'#FF5A5F':'#7B6CFF'}"></i></span></button>`:`<button type="button" class="rvwt" data-act="registro"><small>Registro</small><b>${loggedSessions(curC()).length}</b><em style="color:var(--muted)">sesiones en el bloque ${curC()}</em></button>`,
-    `<button type="button" class="rvwt" data-tab="miplan"><small>Próxima revisión</small><b style="font-size:19px">${re.toLocaleDateString('es-ES',{day:'numeric',month:'short'})}</b><em style="color:var(--muted)">medidas y objetivos</em></button>`,
+    `<button type="button" class="rvwt" data-tab="miplan"><small>Próxima revisión</small><b style="font-size:19px">${re.toLocaleDateString(LOC(),{day:'numeric',month:'short'})}</b><em style="color:var(--muted)">medidas y objetivos</em></button>`,
     S.lesion==='Sí'?`<button type="button" class="rvwt" data-tab="entreno"><small>${esc((ZONAG[S.zona]||[S.zona||'Lesión'])[0].replace(/^./,c=>c.toUpperCase()))}</small><b>${S.dolorMov??0}/10</b><em style="color:${(S.dolorMov??0)<=3?'#2BD46A':(S.dolorMov??0)<=5?'#FFB340':'#FF5A5F'}">● ${(S.dolorMov??0)<=3?'semáforo verde':(S.dolorMov??0)<=5?'semáforo ámbar':'semáforo rojo'}</em></button>`:`<button type="button" class="rvwt" data-tab="nutri"><small>Proteína de hoy</small><b>${wd?wd.p+' g':'—'}</b><em style="color:var(--muted)">${np?fmt(np.pkg,1)+' g por kg':''}</em></button>`];
   return `${bal}<div class="rvdots"><i class="on"></i><i></i><i></i></div>${acts}${si>=0&&!skT?quickHTML(w,si):(!skT?sportQuickHTML(w,ti,D):'')}${promo}${card}${badgesHTML()}<div class="rvsec">Widgets<button type="button" data-act="widgets" aria-label="Añadir widget">+</button></div><div class="rvw" style="margin-top:6px">${tiles.join('')}</div>${planInfoHTML()}<div style="height:10px"></div>`;}
 
@@ -4447,7 +4510,7 @@ function planInfoHTML(){const d=S,r=calc(),p=plan(),OW=optimizeWeek();
   if(d.edad>=65)notes.push('Incluye equilibrio, fuerza funcional y prevención de caídas, con progresión más gradual.');
   if(r.minor)notes.push('Técnica primero y cargas moderadas, con supervisión recomendada.');
   if(sportsList().length)notes.push('Semana organizada junto a '+esc(sportsList().map(spName).join(', ').toLowerCase())+': mira el calendario.');
-  if(d.rendimiento&&d.deporte)notes.push(`Bloque específico de ${esc((d.deporteDet||d.deporte).toLowerCase())}${d.fechaPrueba?', periodizado hacia el '+new Date(d.fechaPrueba+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}):''}.`);
+  if(d.rendimiento&&d.deporte)notes.push(`Bloque específico de ${esc((d.deporteDet||d.deporte).toLowerCase())}${d.fechaPrueba?', periodizado hacia el '+new Date(d.fechaPrueba+'T12:00').toLocaleDateString(LOC(),{day:'numeric',month:'long',year:'numeric'}):''}.`);
   if(d.sueno==='Menos de 6'||d.estres>=4)notes.push('Volumen inicial algo más bajo por sueño o estrés; se sube si recuperas bien.');
   return `<details class="volx pinfo hinfo"${PINFO?' open':''}><summary>Cómo está montado tu plan<small>Objetivo, esquema, material, ajustes y por qué tu semana está así</small></summary><div class="pinfob">
    ${OW.why.length?`<h4 class="rhsub">Tu semana</h4><ul class="why">${OW.why.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
@@ -4725,7 +4788,7 @@ function summary(){
   h+=`<section class="block"><div class="block-h"><h2>Registro y progresión</h2></div><p style="margin:0">Planifica las 5 semanas del ciclo por día, anota peso, repeticiones y RIR de cada serie, y recibe el peso y las repeticiones para la siguiente sesión.</p><div class="cta"><button class="btn primary" style="flex:none" data-act="registro">Abrir registro del ciclo</button><button class="btn" data-act="progreso">Ver mi progreso</button></div></section>`;
   const P_reg=h;h='';
   const re=new Date();re.setDate(re.getDate()+35);
-  h+=`<section class="block"><div class="block-h"><h2>Próxima revisión</h2></div><p style="margin:0">El ${re.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})} repetiremos medidas y objetivos para reajustar el plan.</p></section>`;
+  h+=`<section class="block"><div class="block-h"><h2>Próxima revisión</h2></div><p style="margin:0">El ${re.toLocaleDateString(LOC(),{weekday:'long',day:'numeric',month:'long'})} repetiremos medidas y objetivos para reajustar el plan.</p></section>`;
   h+=`<details><summary>Datos recogidos (JSON para desarrollo)</summary><div style="padding:0 14px 10px"><button class="ghostbtn" data-act="copy">Copiar JSON</button></div><pre id="json">${esc(JSON.stringify(S,null,2))}</pre></details>`;
   h+=`<p class="note">Prototipo. Las fórmulas (Mifflin-St Jeor, US Navy) y las reglas son de ejemplo para validar el flujo. No sustituye la valoración de un profesional sanitario.</p>`;
   const P_end=h,tab=S.tab||'hoy';
