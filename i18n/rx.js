@@ -47,3 +47,5 @@
 ,[/^Casi cuadra: (.+) respecto al objetivo de esta comida$/,(m,a)=>'Almost fits: '+a.replace(/ de grasa/g,' fat').replace(/ de hidratos/g,' carbs').replace(/ de proteína/g,' protein')+' compared with this meal\'s target']
 
 ,[/^Receta: (.+)$/,(m,a)=>'Recipe: '+(trS(a,1)||a)]
+
+,[/^No hay resultados para «(.+)»\. Prueba con otra palabra: un ejercicio, un plato, un alimento, «enfermo» o «idioma»\.$/,(m,a)=>'No results for “'+a+'”. Try another word: an exercise, a dish, a food, “sick” or “language”.']

@@ -9,7 +9,7 @@ const I18N_MISS=new Set();
 const I18N_NORM=t=>t.replace(/\{\d+\}|\d+(?:[.,]\d+)*/g,'#');let I18N_VK=null;
 const isEN=t=>{if(!I18N_VK)I18N_VK=new Set(Object.values(EN).map(I18N_NORM));return I18N_VK.has(I18N_NORM(t))};
 const numEN=n=>/^\d{1,3}(\.\d{3})+$/.test(n)?n.replace(/\./g,','):/^\d+,\d+$/.test(n)?n.replace(',','.'):n;
-function trS(t,deep){if(EN[t]!=null)return EN[t];
+function trS(t,deep){if(!t)return null;if(EN[t]!=null)return EN[t];
   {const a=t.match(/^(· |≈ )(.+)$/)||t.match(/^(.+?)( ↗| →)$/);if(a){const pre=/^(· |≈ )$/.test(a[1]),r=trS(pre?a[2]:a[1],deep);if(r!=null)return pre?a[1]+r:r+a[2]}}
   const nums=[],k=t.replace(/\d+(?:[.,]\d+)*/g,m=>{nums.push(m);return '{'+(nums.length-1)+'}'});
   if(nums.length&&EN[k]!=null)return EN[k].replace(/\{(\d+)\}/g,(_,i)=>numEN(nums[+i]));
